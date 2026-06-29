@@ -1,7 +1,6 @@
 "use server";
 
-import { getAuth } from "@/lib/auth/server";
-import { redirect } from "next/navigation";
+import { signIn } from "@/lib/auth";
 
 interface ActionResult {
   error: string | null;
@@ -14,11 +13,17 @@ export async function signInAction(
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
-  const { error } = await getAuth().signIn.email({ email, password });
-
-  if (error) {
-    return { error: error.message ?? "Invalid credentials" };
+  try {
+    await signIn("credentials", {
+      email,
+      password,
+      redirectTo: "/dashboard",
+    });
+    return { error: null };
+  } catch (error) {
+    if ((error as any)?.code === "CREDENTIALS_REQUIRED" || (error as any)?.type === "CredentialsSignin") {
+      return { error: "Invalid email or password" };
+    }
+    throw error;
   }
-
-  redirect("/dashboard");
 }

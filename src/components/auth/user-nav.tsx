@@ -1,6 +1,6 @@
 "use client";
 
-import { signOutAction } from "@/lib/auth/actions";
+import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { LogOut, User } from "lucide-react";
 
@@ -16,12 +16,16 @@ export function UserNav({ name, email }: UserNavProps) {
         <User className="h-4 w-4 text-muted-foreground" />
         <span className="hidden sm:inline text-muted-foreground">{name || email}</span>
       </div>
-      <form action={signOutAction}>
-        <Button type="submit" variant="ghost" size="sm" className="gap-2">
-          <LogOut className="h-4 w-4" />
-          <span className="hidden sm:inline">Sign out</span>
-        </Button>
-      </form>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="gap-2"
+        onClick={() => signOut({ redirectTo: "/" })}
+      >
+        <LogOut className="h-4 w-4" />
+        <span className="hidden sm:inline">Sign out</span>
+      </Button>
     </div>
   );
 }
