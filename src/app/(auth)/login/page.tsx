@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getAuth } from "@/lib/auth/server";
 import { SignInForm } from "@/components/auth/sign-in-form";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Sign in - DSA Tracker",
 };
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const { data: session } = await getAuth().getSession();
+  if (session?.user) redirect("/dashboard");
   return (
     <div className="w-full max-w-md space-y-6">
       <div className="text-center">
