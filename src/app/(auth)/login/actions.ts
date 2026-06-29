@@ -1,6 +1,7 @@
 "use server";
 
 import { signIn } from "@/lib/auth";
+import { signInSchema } from "@/lib/schemas";
 
 interface ActionResult {
   error: string | null;
@@ -10,8 +11,19 @@ export async function signInAction(
   _prev: ActionResult,
   formData: FormData,
 ): Promise<ActionResult> {
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+  const parsed = signInSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
+
+  if (!parsed.success) {
+    const fieldErrors = parsed.error.flatten().fieldErrors;
+    const firstError =
+      fieldErrors.email?.[0] ?? fieldErrors.password?.[0] ?? "Invalid input";
+    return { error: firstError };
+  }
+
+  const { email, password } = parsed.data;
 
   try {
     await signIn("credentials", {
@@ -21,7 +33,12 @@ export async function signInAction(
     });
     return { error: null };
   } catch (error) {
-    if ((error as any)?.code === "CREDENTIALS_REQUIRED" || (error as any)?.type === "CredentialsSignin") {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "type" in error &&
+      (error as { type: string }).type === "CredentialsSignin"
+    ) {
       return { error: "Invalid email or password" };
     }
     throw error;

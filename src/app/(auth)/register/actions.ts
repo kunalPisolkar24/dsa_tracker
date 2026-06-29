@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
+import { signUpSchema } from "@/lib/schemas";
 
 interface ActionResult {
   error: string | null;
@@ -12,25 +13,43 @@ export async function signUpAction(
   _prev: ActionResult,
   formData: FormData,
 ): Promise<ActionResult> {
-  const name = formData.get("name") as string;
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
-  const confirmPassword = formData.get("confirmPassword") as string;
-
-  if (password !== confirmPassword) {
-    return { error: "Passwords do not match" };
-  }
-
-  const existing = await prisma.user.findUnique({ where: { email } });
-  if (existing) {
-    return { error: "An account with this email already exists" };
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 12);
-
-  await prisma.user.create({
-    data: { name, email, hashedPassword },
+  const parsed = signUpSchema.safeParse({
+    name: formData.get("name"),
+    email: formData.get("email"),
+    password: formData.get("password"),
+    confirmPassword: formData.get("confirmPassword"),
   });
+
+  if (!parsed.success) {
+    const fieldErrors = parsed.error.flatten().fieldErrors;
+    const firstError =
+      fieldErrors.name?.[0] ??
+      fieldErrors.email?.[0] ??
+      fieldErrors.password?.[0] ??
+      fieldErrors.confirmPassword?.[0] ??
+      "Invalid input";
+    return { error: firstError };
+  }
+
+  const { name, email, password } = parsed.data;
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    await prisma.user.create({
+      data: { name, email, hashedPassword },
+    });
+  } catch (error) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      (error as { code: string }).code === "P2002"
+    ) {
+      return { error: "An account with this email already exists" };
+    }
+    return { error: "Something went wrong. Please try again." };
+  }
 
   redirect("/login");
 }
