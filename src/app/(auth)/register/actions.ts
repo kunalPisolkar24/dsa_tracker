@@ -15,6 +15,11 @@ export async function signUpAction(
   const name = formData.get("name") as string;
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
+  const confirmPassword = formData.get("confirmPassword") as string;
+
+  if (password !== confirmPassword) {
+    return { error: "Passwords do not match" };
+  }
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
