@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useActionState, useState } from "react";
+import { signInAction } from "@/app/(auth)/login/actions";
 import { authClient } from "@/lib/auth/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,76 +10,52 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Loader2 } from "lucide-react";
 
 export function SignInForm() {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-
-    const { error: authError } = await authClient.signIn.email({
-      email,
-      password,
-    });
-
-    if (authError) {
-      setError(authError.message ?? "Something went wrong");
-      setIsLoading(false);
-      return;
-    }
-
-    router.push("/dashboard");
-    router.refresh();
-  }
+  const [state, formAction, isPending] = useActionState(signInAction, {
+    error: null,
+  });
 
   return (
-    <form onSubmit={handleSubmit} className="w-full">
+    <div className="w-full">
       <Card className="w-full max-w-md mx-auto">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold tracking-tight">Sign in</CardTitle>
-          <CardDescription>Enter your email and password to access your account</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="you@example.com"
-              required
-              autoComplete="email"
-              disabled={isLoading}
-            />
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
+        <form action={formAction}>
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-bold tracking-tight">Sign in</CardTitle>
+            <CardDescription>Enter your email and password to access your account</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="you@example.com"
+                required
+                autoComplete="email"
+                disabled={isPending}
+              />
             </div>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              placeholder="Enter your password"
-              required
-              autoComplete="current-password"
-              disabled={isLoading}
-            />
-          </div>
-          {error && (
-            <p className="text-sm text-destructive font-medium">{error}</p>
-          )}
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Sign in
-          </Button>
-        </CardContent>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="Enter your password"
+                required
+                autoComplete="current-password"
+                disabled={isPending}
+              />
+            </div>
+            {state?.error && (
+              <p className="text-sm text-destructive font-medium">{state.error}</p>
+            )}
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Sign in
+            </Button>
+          </CardContent>
+        </form>
         <CardFooter className="flex flex-col space-y-4">
           <div className="relative w-full">
             <div className="absolute inset-0 flex items-center">
@@ -92,7 +68,7 @@ export function SignInForm() {
           <GoogleSignInButton />
         </CardFooter>
       </Card>
-    </form>
+    </div>
   );
 }
 

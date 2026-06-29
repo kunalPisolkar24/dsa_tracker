@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { authClient } from "@/lib/auth/client";
+import { useActionState } from "react";
+import { signUpAction } from "@/app/(auth)/register/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,38 +9,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2 } from "lucide-react";
 
 export function SignUpForm() {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-
-    const formData = new FormData(e.currentTarget);
-    const name = formData.get("name") as string;
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-
-    const { error: authError } = await authClient.signUp.email({
-      name,
-      email,
-      password,
-    });
-
-    if (authError) {
-      setError(authError.message ?? "Something went wrong");
-      setIsLoading(false);
-      return;
-    }
-
-    router.push("/dashboard");
-    router.refresh();
-  }
+  const [state, formAction, isPending] = useActionState(signUpAction, {
+    error: null,
+  });
 
   return (
-    <form onSubmit={handleSubmit} className="w-full">
+    <form action={formAction} className="w-full">
       <Card className="w-full max-w-md mx-auto">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold tracking-tight">Create an account</CardTitle>
@@ -56,7 +29,7 @@ export function SignUpForm() {
               type="text"
               placeholder="John Doe"
               required
-              disabled={isLoading}
+              disabled={isPending}
             />
           </div>
           <div className="space-y-2">
@@ -68,7 +41,7 @@ export function SignUpForm() {
               placeholder="you@example.com"
               required
               autoComplete="email"
-              disabled={isLoading}
+              disabled={isPending}
             />
           </div>
           <div className="space-y-2">
@@ -81,14 +54,14 @@ export function SignUpForm() {
               required
               autoComplete="new-password"
               minLength={8}
-              disabled={isLoading}
+              disabled={isPending}
             />
           </div>
-          {error && (
-            <p className="text-sm text-destructive font-medium">{error}</p>
+          {state?.error && (
+            <p className="text-sm text-destructive font-medium">{state.error}</p>
           )}
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          <Button type="submit" className="w-full" disabled={isPending}>
+            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Create account
           </Button>
         </CardContent>
