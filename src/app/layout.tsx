@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
   subsets: ["latin"],
 });
 
@@ -27,7 +26,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn(geistSans.variable, geistMono.variable)}
+      className={cn(geistSans.className, geistMono.variable)}
       suppressHydrationWarning
     >
       <body className="min-h-dvh bg-background font-sans antialiased">
