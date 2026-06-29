@@ -132,14 +132,15 @@
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
   input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 30px transparent inset !important;
+    -webkit-box-shadow: 0 0 0 1000px var(--card) inset !important;
     -webkit-text-fill-color: var(--foreground) !important;
     transition: background-color 5000s ease-in-out 0s;
     caret-color: var(--foreground);
+    border-radius: inherit;
   }
 
   input:autofill {
-    background-color: transparent !important;
+    background-color: var(--card) !important;
     color: var(--foreground) !important;
   }
 }
