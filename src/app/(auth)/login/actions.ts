@@ -41,6 +41,6 @@ export async function signInAction(
     ) {
       return { error: "Invalid email or password" };
     }
-    throw error;
+    return { error: "Something went wrong. Please try again." };
   }
 }
