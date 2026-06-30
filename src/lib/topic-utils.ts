@@ -154,6 +154,7 @@ export function createProblemService(input: CreateProblemInput): ProblemStoreIte
     subTopicId: parsed.subTopicId || null,
     notes: parsed.notes,
     reviewCount: 0,
+    sortOrder: 0,
   };
 }
 
