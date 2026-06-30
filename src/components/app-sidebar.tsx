@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { ChevronsUpDown, LogOut, Code2 } from "lucide-react";
+import { ChevronsUpDown, LogOut, Code2, PanelLeftClose } from "lucide-react";
 
 import {
   Sidebar,
@@ -14,9 +14,11 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import {
   DropdownMenu,
@@ -53,6 +55,7 @@ function getInitials(name: string): string {
 export function AppSidebar({ user, navItems }: AppSidebarProps) {
   const pathname = usePathname();
   const setActiveNav = useUIStore((s) => s.setActiveNav);
+  const { toggleSidebar } = useSidebar();
 
   return (
     <Sidebar collapsible="icon">
@@ -69,6 +72,9 @@ export function AppSidebar({ user, navItems }: AppSidebarProps) {
                 </div>
               </Link>
             </SidebarMenuButton>
+            <SidebarMenuAction onClick={toggleSidebar}>
+              <PanelLeftClose className="size-4" />
+            </SidebarMenuAction>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
