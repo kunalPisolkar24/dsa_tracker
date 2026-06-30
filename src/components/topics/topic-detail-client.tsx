@@ -11,7 +11,7 @@ import { useTopicStore } from "@/stores/topic-store";
 import {
   computeTopicCardViewModel,
   computeSubtopicViewModel,
-} from "@/lib/topic-service";
+} from "@/lib/topic-utils";
 import { LAYOUT } from "@/lib/constants";
 import type {
   SubTopicStoreItem,

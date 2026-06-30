@@ -18,7 +18,7 @@ import {
   filterTopics,
   paginateTopics,
   computeTopicCardViewModel,
-} from "@/lib/topic-service";
+} from "@/lib/topic-utils";
 import { LAYOUT } from "@/lib/constants";
 import type { CreateTopicInput } from "@/lib/schemas";
 import { TopicCard } from "@/components/topics/topic-card";
