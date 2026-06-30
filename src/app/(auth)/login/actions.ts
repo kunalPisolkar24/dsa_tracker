@@ -33,6 +33,9 @@ export async function signInAction(
     });
     return { error: null };
   } catch (error) {
+    if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
+      throw error;
+    }
     if (
       typeof error === "object" &&
       error !== null &&

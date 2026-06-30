@@ -2,7 +2,9 @@ import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
 import Credentials from "next-auth/providers/credentials"
 import { prisma } from "@/lib/prisma"
-import bcrypt from "bcryptjs"
+import { verifyPassword } from "@/lib/password"
+import { upsertGoogleUser } from "@/lib/user-service"
+import { logger } from "@/lib/logger"
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
   providers: [
@@ -19,7 +21,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         const user = await prisma.user.findUnique({ where: { email } })
         if (!user || !user.hashedPassword) return null
 
-        const isValid = await bcrypt.compare(password, user.hashedPassword)
+        const isValid = await verifyPassword(password, user.hashedPassword)
         if (!isValid) return null
 
         return { id: user.id, email: user.email, name: user.name }
@@ -29,16 +31,11 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   callbacks: {
     async signIn({ user, account }) {
       if (account?.provider === "google") {
-        if (!user.email) return false
-        try {
-          await prisma.user.upsert({
-            where: { email: user.email },
-            create: { email: user.email, name: user.name },
-            update: { name: user.name },
-          })
-        } catch {
+        if (!user.email) {
+          logger.error("Google sign-in failed: no email")
           return false
         }
+        return upsertGoogleUser(user.email, user.name)
       }
       return true
     },
