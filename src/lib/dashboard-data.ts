@@ -22,9 +22,15 @@ export interface HeatmapEntry {
   count: number;
 }
 
+export interface WeeklySolvedEntry {
+  date: string;
+  count: number;
+}
+
 export interface DashboardData {
   solvedToday: number;
   streak: number;
+  weeklySolved: WeeklySolvedEntry[];
   difficultyBreakdown: Record<"EASY" | "MEDIUM" | "HARD", DifficultyStats>;
   totalSolved: number;
   totalProblems: number;
@@ -32,6 +38,23 @@ export interface DashboardData {
   reviewStats: { solved: number; markedForReview: number };
   heatmap: HeatmapEntry[];
   recentActivity: RecentActivityEntry[];
+}
+
+function generateWeeklySolvedData(): WeeklySolvedEntry[] {
+  const data: WeeklySolvedEntry[] = [];
+  const now = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    data.push({
+      date: `${y}-${m}-${day}`,
+      count: Math.floor(Math.random() * 8) + 1,
+    });
+  }
+  return data;
 }
 
 function generateHeatmapData(): HeatmapEntry[] {
@@ -54,6 +77,7 @@ export function getDashboardData(): DashboardData {
   return {
     solvedToday: 5,
     streak: 12,
+    weeklySolved: generateWeeklySolvedData(),
     difficultyBreakdown: {
       EASY: { solved: 25, total: 40 },
       MEDIUM: { solved: 14, total: 42 },
