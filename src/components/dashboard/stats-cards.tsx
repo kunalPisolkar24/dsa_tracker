@@ -63,7 +63,7 @@ export function StatsCards({ solvedToday, weeklySolved }: StatsCardsProps) {
 
   return (
     <>
-      <Card className="col-span-1 md:col-span-2">
+      <Card className="col-span-1 md:col-span-2 justify-center">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-base text-foreground">
             <div className="flex size-8 items-center justify-center rounded-full bg-chart-2/15">
