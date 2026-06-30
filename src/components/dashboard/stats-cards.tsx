@@ -74,7 +74,7 @@ export function StatsCards({ solvedToday, streak, weeklySolved }: StatsCardsProp
             <span className="ml-auto text-2xl font-bold tracking-tight text-chart-2">
               {solvedToday}
             </span>
-            <span className="text-xs text-muted-foreground">today</span>
+            <span className="text-xs text-foreground/60">today</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
@@ -90,14 +90,14 @@ export function StatsCards({ solvedToday, streak, weeklySolved }: StatsCardsProp
                 dataKey="label"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                tick={{ fontSize: 11, fill: "hsl(var(--foreground))" }}
                 dy={4}
               />
               <YAxis
                 allowDecimals={false}
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                tick={{ fontSize: 11, fill: "hsl(var(--foreground))" }}
               />
               <Tooltip content={<CustomTooltip />} cursor={false} />
               <Area
