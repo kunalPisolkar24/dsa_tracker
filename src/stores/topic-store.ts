@@ -18,21 +18,10 @@ import {
   createProblemService,
   updateProblemService,
   moveProblemInArray,
-} from "@/lib/topic-service";
-import {
-  getTopics as fetchTopicsFromDb,
-  createTopic as createTopicInDb,
-  updateTopic as updateTopicInDb,
-  deleteTopic as deleteTopicInDb,
-  createSubTopic as createSubTopicInDb,
-  updateSubTopic as updateSubTopicInDb,
-  deleteSubTopic as deleteSubTopicInDb,
-  createProblem as createProblemInDb,
-  updateProblem as updateProblemInDb,
-  deleteProblem as deleteProblemInDb,
-  updateProblemStatus as updateProblemStatusInDb,
-  updateProblemReviewCount as updateProblemReviewCountInDb,
-} from "@/lib/topic-crud";
+} from "@/lib/topic-utils";
+import * as topicService from "@/lib/services/topic-service";
+import * as subTopicService from "@/lib/services/subtopic-service";
+import * as problemService from "@/lib/services/problem-service";
 
 interface TopicStoreState {
   topics: TopicStoreItem[];
@@ -89,7 +78,7 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
     if (get().hydrated) return;
     set({ hydrating: true });
     try {
-      const dbTopics = await fetchTopicsFromDb();
+      const dbTopics = await topicService.getTopics();
       if (dbTopics.length > 0) {
         set({ topics: dbTopics, hydrated: true, hydrating: false, hydrationError: false });
       } else {
@@ -101,35 +90,45 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
   },
 
   addTopic: (input) => {
+    const snapshot = get().topics;
     const newTopic = createTopicService(input);
     set((state) => ({ topics: [...state.topics, newTopic] }));
-    createTopicInDb(input).then((dbTopic) => {
+    topicService.createTopic(input).then((dbTopic) => {
       if (dbTopic) {
         set((state) => ({
           topics: state.topics.map((t) => (t.id === newTopic.id ? dbTopic : t)),
         }));
+      } else {
+        set({ topics: snapshot });
       }
     });
     return newTopic;
   },
 
   updateTopic: (id, input) => {
+    const snapshot = get().topics;
     set((state) => ({
       topics: state.topics.map((t) =>
         t.id === id ? updateTopicService(t, input) : t
       ),
     }));
-    updateTopicInDb(id, input);
+    topicService.updateTopic(id, input).then((dbTopic) => {
+      if (!dbTopic) set({ topics: snapshot });
+    });
   },
 
   removeTopic: (id) => {
+    const snapshot = get().topics;
     set((state) => ({
       topics: state.topics.filter((t) => t.id !== id),
     }));
-    deleteTopicInDb(id);
+    topicService.deleteTopic(id).then((success) => {
+      if (!success) set({ topics: snapshot });
+    });
   },
 
   addSubTopic: (topicId, input) => {
+    const snapshot = get().topics;
     const newSubTopic = createSubTopicService({ ...input, topicId });
     set((state) => ({
       topics: state.topics.map((t) =>
@@ -138,7 +137,7 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
           : t
       ),
     }));
-    createSubTopicInDb(topicId, input).then((dbSubTopic) => {
+    subTopicService.createSubTopic(topicId, input).then((dbSubTopic) => {
       if (dbSubTopic) {
         set((state) => ({
           topics: state.topics.map((t) =>
@@ -152,12 +151,15 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
               : t
           ),
         }));
+      } else {
+        set({ topics: snapshot });
       }
     });
     return newSubTopic;
   },
 
   updateSubTopic: (topicId, subTopicId, input) => {
+    const snapshot = get().topics;
     set((state) => ({
       topics: state.topics.map((t) =>
         t.id !== topicId
@@ -170,10 +172,13 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
             }
       ),
     }));
-    updateSubTopicInDb(subTopicId, input);
+    subTopicService.updateSubTopic(subTopicId, input).then((dbSubTopic) => {
+      if (!dbSubTopic) set({ topics: snapshot });
+    });
   },
 
   removeSubTopic: (topicId, subTopicId) => {
+    const snapshot = get().topics;
     set((state) => ({
       topics: state.topics.map((t) =>
         t.id === topicId
@@ -181,10 +186,13 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
           : t
       ),
     }));
-    deleteSubTopicInDb(subTopicId);
+    subTopicService.deleteSubTopic(subTopicId).then((success) => {
+      if (!success) set({ topics: snapshot });
+    });
   },
 
   addProblem: (topicId, input) => {
+    const snapshot = get().topics;
     const newProblem = createProblemService({ ...input, topicId });
     set((state) => ({
       topics: state.topics.map((t) => {
@@ -202,7 +210,7 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
         return { ...t, problems: [...t.problems, newProblem] };
       }),
     }));
-    createProblemInDb(topicId, input).then((dbProblem) => {
+    problemService.createProblem(topicId, input).then((dbProblem) => {
       if (dbProblem) {
         set((state) => ({
           topics: state.topics.map((t) => {
@@ -222,12 +230,15 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
             return { ...t, problems: updateProblemInList(t.problems) };
           }),
         }));
+      } else {
+        set({ topics: snapshot });
       }
     });
     return newProblem;
   },
 
   updateProblem: (topicId, problemId, input) => {
+    const snapshot = get().topics;
     set((state) => {
       const container = findProblemContainer(state.topics, topicId, problemId);
       if (!container) return state;
@@ -259,10 +270,13 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
         }),
       };
     });
-    updateProblemInDb(problemId, input);
+    problemService.updateProblem(problemId, input).then((dbProblem) => {
+      if (!dbProblem) set({ topics: snapshot });
+    });
   },
 
   removeProblem: (topicId, problemId) => {
+    const snapshot = get().topics;
     set((state) => {
       const container = findProblemContainer(state.topics, topicId, problemId);
       if (!container) return state;
@@ -287,10 +301,13 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
         }),
       };
     });
-    deleteProblemInDb(problemId);
+    problemService.deleteProblem(problemId).then((success) => {
+      if (!success) set({ topics: snapshot });
+    });
   },
 
   updateProblemStatus: (topicId, problemId, status) => {
+    const snapshot = get().topics;
     set((state) => {
       const container = findProblemContainer(state.topics, topicId, problemId);
       if (!container) return state;
@@ -334,10 +351,13 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
         }),
       };
     });
-    updateProblemStatusInDb(problemId, status);
+    problemService.updateProblemStatus(problemId, status).then((result) => {
+      if (!result) set({ topics: snapshot });
+    });
   },
 
   updateProblemReviewCount: (topicId, problemId, reviewCount) => {
+    const snapshot = get().topics;
     set((state) => {
       const container = findProblemContainer(state.topics, topicId, problemId);
       if (!container) return state;
@@ -369,7 +389,9 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
         }),
       };
     });
-    updateProblemReviewCountInDb(problemId, reviewCount);
+    problemService.updateProblemReviewCount(problemId, reviewCount).then((result) => {
+      if (!result) set({ topics: snapshot });
+    });
   },
 
   moveProblem: (topicId, problemId, direction) => {
