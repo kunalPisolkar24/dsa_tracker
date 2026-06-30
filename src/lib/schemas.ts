@@ -9,7 +9,12 @@ export const signUpSchema = z
   .object({
     name: z.string().min(1, "Name is required"),
     email: z.string().email("Invalid email address"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .regex(/[A-Z]/, "Password must contain an uppercase letter")
+      .regex(/[a-z]/, "Password must contain a lowercase letter")
+      .regex(/[0-9]/, "Password must contain a number"),
     confirmPassword: z.string().min(1, "Please confirm your password"),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -104,4 +109,11 @@ export type UpdateSubTopicInput = z.infer<typeof updateSubTopicSchema>;
 export type CreateProblemInput = z.infer<typeof createProblemSchema>;
 export type UpdateProblemInput = z.infer<typeof updateProblemSchema>;
 export type UpdateProblemStatusInput = z.infer<typeof updateProblemStatusSchema>;
+
+export const updateProblemReviewCountSchema = z.object({
+  reviewCount: z.number().int().min(0),
+});
+
+export type UpdateProblemReviewCountInput = z.infer<typeof updateProblemReviewCountSchema>;
+
 export type LogActivityInput = z.infer<typeof logActivitySchema>;

@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { toDateStr } from "@/lib/date-utils";
 import type { HeatmapEntry } from "@/lib/dashboard-data";
 
 interface HeatmapProps {
@@ -32,6 +33,8 @@ const LEVELS = [
   { threshold: 4, className: "bg-chart-2" },
 ] as const;
 
+const CELL_SIZE = "clamp(14px, 2vw, 18px)";
+
 function getLevel(count: number) {
   for (let i = LEVELS.length - 1; i >= 0; i--) {
     if (count >= LEVELS[i].threshold) return LEVELS[i];
@@ -40,13 +43,6 @@ function getLevel(count: number) {
 }
 
 const DAY_LABELS = ["Mon", "", "Wed", "", "Fri", "", "Sun"];
-
-function toLocalDateStr(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
 
 export function Heatmap({ data, streak, maxStreak }: HeatmapProps) {
   const years = useMemo(() => {
@@ -79,7 +75,7 @@ export function Heatmap({ data, streak, maxStreak }: HeatmapProps) {
 
     let dayIndex = 0;
     while (current <= end) {
-      const dateStr = toLocalDateStr(current);
+      const dateStr = toDateStr(current);
       const count = dayMap.get(dateStr) ?? 0;
       const level = getLevel(count);
       cells.push({ date: dateStr, count, level: level.className });
@@ -129,18 +125,18 @@ export function Heatmap({ data, streak, maxStreak }: HeatmapProps) {
           <div className="flex gap-1">
               <div className="flex flex-col gap-[3px] pt-5 pr-1">
                 {DAY_LABELS.map((label, i) => (
-                  <div key={i} className="text-[10px] text-muted-foreground" style={{ height: 'clamp(14px, 2vw, 18px)', lineHeight: 'clamp(14px, 2vw, 18px)' }}>
+                  <div key={i} className="text-[10px] text-muted-foreground" style={{ height: CELL_SIZE, lineHeight: CELL_SIZE }}>
                     {label}
                   </div>
                 ))}
               </div>
             <div className="flex-1">
-              <div className="relative text-[10px] text-muted-foreground mb-1" style={{ height: 'clamp(14px, 2vw, 18px)' }}>
+              <div className="relative text-[10px] text-muted-foreground mb-1" style={{ height: CELL_SIZE }}>
                 {monthLabels.map((m, i) => (
                   <span
                     key={i}
                     className="absolute"
-                    style={{ left: `calc(${m.col} * (clamp(14px, 2vw, 18px) + 3px))` }}
+                    style={{ left: `calc(${m.col} * (${CELL_SIZE} + 3px))` }}
                   >
                     {m.label}
                   </span>
@@ -149,8 +145,8 @@ export function Heatmap({ data, streak, maxStreak }: HeatmapProps) {
               <div
                 className="grid gap-[3px]"
                 style={{
-                  gridTemplateColumns: `repeat(${Math.ceil(grid.length / 7)}, clamp(14px, 2vw, 18px))`,
-                  gridTemplateRows: `repeat(7, clamp(14px, 2vw, 18px))`,
+                  gridTemplateColumns: `repeat(${Math.ceil(grid.length / 7)}, ${CELL_SIZE})`,
+                  gridTemplateRows: `repeat(7, ${CELL_SIZE})`,
                   gridAutoFlow: "column",
                 }}
               >
@@ -161,7 +157,7 @@ export function Heatmap({ data, streak, maxStreak }: HeatmapProps) {
                         <div
                           suppressHydrationWarning
                           className={`rounded-sm ${cell.level} cursor-default`}
-                          style={{ width: 'clamp(14px, 2vw, 18px)', height: 'clamp(14px, 2vw, 18px)' }}
+                          style={{ width: CELL_SIZE, height: CELL_SIZE }}
                         />
                       </TooltipTrigger>
                       <TooltipContent side="top" className="text-xs">
@@ -175,7 +171,7 @@ export function Heatmap({ data, streak, maxStreak }: HeatmapProps) {
                       </TooltipContent>
                     </Tooltip>
                   ) : (
-                    <div key={i} style={{ width: 'clamp(14px, 2vw, 18px)', height: 'clamp(14px, 2vw, 18px)' }} />
+                    <div key={i} style={{ width: CELL_SIZE, height: CELL_SIZE }} />
                   )
                 )}
               </div>

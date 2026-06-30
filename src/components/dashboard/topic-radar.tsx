@@ -9,6 +9,7 @@ import {
   Tooltip,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CHART_COLORS } from "@/lib/constants";
 import type { TopicRadarEntry } from "@/lib/dashboard-data";
 
 interface TopicRadarProps {
@@ -39,16 +40,16 @@ export function TopicRadar({ data }: TopicRadarProps) {
       <CardContent className="flex flex-1 items-center justify-center">
         <ResponsiveContainer width="100%" height={300}>
           <RadarChart data={data} cx="50%" cy="50%" outerRadius="70%">
-            <PolarGrid stroke="#e5e7eb" />
+            <PolarGrid stroke={CHART_COLORS.GRID_STROKE} />
             <PolarAngleAxis
               dataKey="topic"
-              tick={{ fontSize: 11, fill: "#9ca3af" }}
+              tick={{ fontSize: 11, fill: CHART_COLORS.TICK_FILL }}
             />
             <Radar
               name="Solved"
               dataKey="solved"
-              stroke="#60a5fa"
-              fill="#60a5fa"
+              stroke={CHART_COLORS.RADAR_FILL}
+              fill={CHART_COLORS.RADAR_FILL}
               fillOpacity={0.25}
             />
             <Tooltip content={<CustomTooltip />} />

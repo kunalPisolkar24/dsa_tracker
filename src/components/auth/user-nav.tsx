@@ -21,7 +21,7 @@ export function UserNav({ name, email }: UserNavProps) {
         variant="ghost"
         size="sm"
         className="gap-2"
-        onClick={() => signOut({ redirectTo: "/" })}
+        onClick={() => signOut({ redirectTo: "/" }).catch(() => {})}
       >
         <LogOut className="h-4 w-4" />
         <span className="hidden sm:inline">Sign out</span>

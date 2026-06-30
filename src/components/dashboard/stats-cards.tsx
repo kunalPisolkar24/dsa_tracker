@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CHART_COLORS } from "@/lib/constants";
 import type { WeeklySolvedEntry } from "@/lib/dashboard-data";
 
 interface StatsCardsProps {
@@ -89,14 +90,14 @@ export function StatsCards({ solvedToday, weeklySolved }: StatsCardsProps) {
                 dataKey="label"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 11, fill: "#cbd5e1" }}
+                tick={{ fontSize: 11, fill: CHART_COLORS.TICK_COLOR }}
                 dy={4}
               />
               <YAxis
                 allowDecimals={false}
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 11, fill: "#cbd5e1" }}
+                tick={{ fontSize: 11, fill: CHART_COLORS.TICK_COLOR }}
               />
               <Tooltip content={<CustomTooltip />} cursor={false} />
               <Area

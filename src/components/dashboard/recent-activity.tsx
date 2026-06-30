@@ -8,34 +8,13 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { STATUS_STYLES, DIFFICULTY_STYLES } from "@/lib/constants";
+import { timeAgo } from "@/lib/date-utils";
 import type { RecentActivityEntry } from "@/lib/dashboard-data";
 
 interface RecentActivityProps {
   data: RecentActivityEntry[];
-}
-
-const DIFFICULTY_COLORS: Record<string, "default" | "secondary" | "destructive"> = {
-  EASY: "default",
-  MEDIUM: "secondary",
-  HARD: "destructive",
-} as const;
-
-const STATUS_VARIANTS: Record<string, "default" | "secondary" | "outline" | "ghost"> = {
-  SOLVED: "default",
-  ATTEMPTED: "secondary",
-  MARKED_FOR_REVIEW: "outline",
-  TODO: "ghost",
-} as const;
-
-function timeAgo(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  if (days < 30) return `${days}d ago`;
-  return new Date(iso).toLocaleDateString();
 }
 
 export function RecentActivity({ data }: RecentActivityProps) {
@@ -64,15 +43,26 @@ export function RecentActivity({ data }: RecentActivityProps) {
                   className="border-b border-border transition-colors hover:bg-muted/50"
                 >
                   <td className="px-4 py-3 text-muted-foreground">{index + 1}</td>
-                  <td className="max-w-0 truncate px-4 py-3 font-medium" title={entry.title}>{entry.title}</td>
+                  <td
+                    className="max-w-0 truncate px-4 py-3 font-medium"
+                    title={`${entry.title} (${entry.topic})`}
+                  >
+                    {entry.title}
+                  </td>
                   <td className="hidden px-4 py-3 sm:table-cell">
-                    <Badge variant={STATUS_VARIANTS[entry.status] ?? "outline"}>
-                      {entry.status.replace(/_/g, " ")}
+                    <Badge
+                      variant="outline"
+                      className={cn(STATUS_STYLES[entry.status]?.className ?? "")}
+                    >
+                      {STATUS_STYLES[entry.status]?.label ?? entry.status.replace(/_/g, " ")}
                     </Badge>
                   </td>
                   <td className="px-4 py-3">
-                    <Badge variant={DIFFICULTY_COLORS[entry.difficulty] ?? "outline"}>
-                      {entry.difficulty}
+                    <Badge
+                      variant="outline"
+                      className={cn(DIFFICULTY_STYLES[entry.difficulty]?.className ?? "")}
+                    >
+                      {DIFFICULTY_STYLES[entry.difficulty]?.label ?? entry.difficulty}
                     </Badge>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">
