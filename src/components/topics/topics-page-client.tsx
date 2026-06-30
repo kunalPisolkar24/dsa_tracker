@@ -25,10 +25,12 @@ import { TopicCard } from "@/components/topics/topic-card";
 import { TopicSearch } from "@/components/topics/topic-search";
 import { TopicFormDialog } from "@/components/topics/topic-form-dialog";
 import { DeleteTopicDialog } from "@/components/topics/delete-topic-dialog";
+import { TopicCardSkeleton } from "@/components/topics/topic-skeleton";
 
 export function TopicsPageClient() {
   const router = useRouter();
   const { topics, addTopic, updateTopic, removeTopic } = useTopicStore();
+  const hydrated = useTopicStore((s) => s.hydrated);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -110,7 +112,20 @@ export function TopicsPageClient() {
       )}
 
       <div className="flex-1">
-        {!hasTopics && (
+        {!hydrated && (
+          <div
+            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+            role="status"
+            aria-busy="true"
+          >
+            <span className="sr-only">Loading topics...</span>
+            {Array.from({ length: 6 }, (_, i) => (
+              <TopicCardSkeleton key={i} />
+            ))}
+          </div>
+        )}
+
+        {hydrated && !hasTopics && (
           <div className="flex flex-col items-center justify-center gap-3 py-24 text-center">
             <p className="text-lg font-medium">No topics yet</p>
             <p className="text-sm text-muted-foreground">
@@ -127,7 +142,7 @@ export function TopicsPageClient() {
           </div>
         )}
 
-        {hasTopics && !hasFilteredResults && (
+        {hydrated && hasTopics && !hasFilteredResults && (
           <div className="flex flex-col items-center justify-center gap-2 py-24 text-center">
             <p className="text-lg font-medium">No results found</p>
             <p className="text-sm text-muted-foreground">
@@ -143,7 +158,7 @@ export function TopicsPageClient() {
           </div>
         )}
 
-        {hasFilteredResults && (
+        {hydrated && hasFilteredResults && (
           <>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {paginatedTopics.map((topic) => (

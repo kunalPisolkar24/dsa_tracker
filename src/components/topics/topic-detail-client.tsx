@@ -22,6 +22,7 @@ import { ProblemRow } from "@/components/topics/problem-row";
 import { SubtopicFormDialog } from "@/components/topics/subtopic-form-dialog";
 import { ProblemFormDialog } from "@/components/topics/problem-form-dialog";
 import { DeleteConfirmationDialog } from "@/components/topics/delete-confirmation-dialog";
+import { TopicDetailSkeleton } from "@/components/topics/topic-skeleton";
 
 interface TopicsDetailClientProps {
   topicId: string;
@@ -36,6 +37,7 @@ type DialogState =
   | { type: "delete"; entityType: "subtopic" | "problem"; target: { id: string; name: string } };
 
 export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
+  const hydrated = useTopicStore((s) => s.hydrated);
   const topic = useTopicStore((s) => s.topics.find((t) => t.id === topicId));
   const {
     addSubTopic,
@@ -61,6 +63,10 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
     () => topic?.subtopics.map(computeSubtopicViewModel) ?? [],
     [topic?.subtopics]
   );
+
+  if (!hydrated) {
+    return <TopicDetailSkeleton />;
+  }
 
   if (!topic || !topicViewModel) {
     return (

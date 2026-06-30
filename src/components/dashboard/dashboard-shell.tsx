@@ -10,10 +10,16 @@ import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { useTopicStore } from "@/stores/topic-store";
 import { computeDashboardData } from "@/lib/dashboard-data";
 import { LAYOUT } from "@/lib/constants";
+import { DashboardShellSkeleton } from "@/components/dashboard/dashboard-skeleton";
 
 export function DashboardShell() {
+  const hydrated = useTopicStore((s) => s.hydrated);
   const topics = useTopicStore((s) => s.topics);
   const data = useMemo(() => computeDashboardData(topics), [topics]);
+
+  if (!hydrated) {
+    return <DashboardShellSkeleton />;
+  }
 
   return (
     <div className={`mx-auto flex w-full ${LAYOUT.MAX_WIDTH} flex-1 flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8`}>
