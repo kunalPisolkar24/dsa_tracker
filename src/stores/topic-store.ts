@@ -20,12 +20,29 @@ import {
   updateProblemService,
   moveProblemInArray,
 } from "@/lib/topic-service";
+import {
+  getTopics as fetchTopicsFromDb,
+  createTopic as createTopicInDb,
+  updateTopic as updateTopicInDb,
+  deleteTopic as deleteTopicInDb,
+  createSubTopic as createSubTopicInDb,
+  updateSubTopic as updateSubTopicInDb,
+  deleteSubTopic as deleteSubTopicInDb,
+  createProblem as createProblemInDb,
+  updateProblem as updateProblemInDb,
+  deleteProblem as deleteProblemInDb,
+  updateProblemStatus as updateProblemStatusInDb,
+  updateProblemReviewCount as updateProblemReviewCountInDb,
+} from "@/lib/topic-crud";
 
 interface TopicStoreState {
   topics: TopicStoreItem[];
+  hydrated: boolean;
+  hydrationError: boolean;
 }
 
 interface TopicStoreActions {
+  hydrate: () => Promise<void>;
   addTopic: (input: CreateTopicInput) => TopicStoreItem;
   updateTopic: (id: string, input: UpdateTopicInput) => void;
   removeTopic: (id: string) => void;
@@ -62,12 +79,35 @@ function findProblemContainer(
   return null;
 }
 
-export const useTopicStore = create<TopicStore>((set) => ({
+export const useTopicStore = create<TopicStore>((set, get) => ({
   topics: seedTopics,
+  hydrated: false,
+  hydrationError: false,
+
+  hydrate: async () => {
+    if (get().hydrated) return;
+    try {
+      const dbTopics = await fetchTopicsFromDb();
+      if (dbTopics.length > 0) {
+        set({ topics: dbTopics, hydrated: true, hydrationError: false });
+      } else {
+        set({ hydrated: true, hydrationError: false });
+      }
+    } catch {
+      set({ hydrated: true, hydrationError: true });
+    }
+  },
 
   addTopic: (input) => {
     const newTopic = createTopicService(input);
     set((state) => ({ topics: [...state.topics, newTopic] }));
+    createTopicInDb(input).then((dbTopic) => {
+      if (dbTopic) {
+        set((state) => ({
+          topics: state.topics.map((t) => (t.id === newTopic.id ? dbTopic : t)),
+        }));
+      }
+    });
     return newTopic;
   },
 
@@ -77,12 +117,14 @@ export const useTopicStore = create<TopicStore>((set) => ({
         t.id === id ? updateTopicService(t, input) : t
       ),
     }));
+    updateTopicInDb(id, input);
   },
 
   removeTopic: (id) => {
     set((state) => ({
       topics: state.topics.filter((t) => t.id !== id),
     }));
+    deleteTopicInDb(id);
   },
 
   addSubTopic: (topicId, input) => {
@@ -94,6 +136,22 @@ export const useTopicStore = create<TopicStore>((set) => ({
           : t
       ),
     }));
+    createSubTopicInDb(topicId, input).then((dbSubTopic) => {
+      if (dbSubTopic) {
+        set((state) => ({
+          topics: state.topics.map((t) =>
+            t.id === topicId
+              ? {
+                  ...t,
+                  subtopics: t.subtopics.map((s) =>
+                    s.id === newSubTopic.id ? dbSubTopic : s
+                  ),
+                }
+              : t
+          ),
+        }));
+      }
+    });
     return newSubTopic;
   },
 
@@ -110,6 +168,7 @@ export const useTopicStore = create<TopicStore>((set) => ({
             }
       ),
     }));
+    updateSubTopicInDb(subTopicId, input);
   },
 
   removeSubTopic: (topicId, subTopicId) => {
@@ -120,6 +179,7 @@ export const useTopicStore = create<TopicStore>((set) => ({
           : t
       ),
     }));
+    deleteSubTopicInDb(subTopicId);
   },
 
   addProblem: (topicId, input) => {
@@ -140,6 +200,28 @@ export const useTopicStore = create<TopicStore>((set) => ({
         return { ...t, problems: [...t.problems, newProblem] };
       }),
     }));
+    createProblemInDb(topicId, input).then((dbProblem) => {
+      if (dbProblem) {
+        set((state) => ({
+          topics: state.topics.map((t) => {
+            if (t.id !== topicId) return t;
+            const updateProblemInList = (problems: ProblemStoreItem[]) =>
+              problems.map((p) => (p.id === newProblem.id ? dbProblem : p));
+            if (input.subTopicId) {
+              return {
+                ...t,
+                subtopics: t.subtopics.map((s) =>
+                  s.id === input.subTopicId
+                    ? { ...s, problems: updateProblemInList(s.problems) }
+                    : s
+                ),
+              };
+            }
+            return { ...t, problems: updateProblemInList(t.problems) };
+          }),
+        }));
+      }
+    });
     return newProblem;
   },
 
@@ -175,6 +257,7 @@ export const useTopicStore = create<TopicStore>((set) => ({
         }),
       };
     });
+    updateProblemInDb(problemId, input);
   },
 
   removeProblem: (topicId, problemId) => {
@@ -202,6 +285,7 @@ export const useTopicStore = create<TopicStore>((set) => ({
         }),
       };
     });
+    deleteProblemInDb(problemId);
   },
 
   updateProblemStatus: (topicId, problemId, status) => {
@@ -216,7 +300,13 @@ export const useTopicStore = create<TopicStore>((set) => ({
             return {
               ...t,
               problems: t.problems.map((p) =>
-                p.id === problemId ? { ...p, status } : p
+                p.id === problemId
+                  ? {
+                      ...p,
+                      status,
+                      ...(status === "SOLVED" ? { solvedAt: new Date().toISOString() } : {}),
+                    }
+                  : p
               ),
             };
           }
@@ -228,7 +318,13 @@ export const useTopicStore = create<TopicStore>((set) => ({
                 : {
                     ...s,
                     problems: s.problems.map((p) =>
-                      p.id === problemId ? { ...p, status } : p
+                      p.id === problemId
+                        ? {
+                            ...p,
+                            status,
+                            ...(status === "SOLVED" ? { solvedAt: new Date().toISOString() } : {}),
+                          }
+                        : p
                     ),
                   }
             ),
@@ -236,6 +332,7 @@ export const useTopicStore = create<TopicStore>((set) => ({
         }),
       };
     });
+    updateProblemStatusInDb(problemId, status);
   },
 
   updateProblemReviewCount: (topicId, problemId, reviewCount) => {
@@ -270,6 +367,7 @@ export const useTopicStore = create<TopicStore>((set) => ({
         }),
       };
     });
+    updateProblemReviewCountInDb(problemId, reviewCount);
   },
 
   moveProblem: (topicId, problemId, direction) => {
