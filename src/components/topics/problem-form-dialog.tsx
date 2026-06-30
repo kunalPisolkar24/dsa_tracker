@@ -21,8 +21,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
+import { z } from "zod";
 import { createProblemSchema, updateProblemSchema } from "@/lib/schemas";
 import type { SubTopicStoreItem } from "@/types/topics";
+
+const createProblemFormSchema = z.object({
+  title: createProblemSchema.shape.title,
+  url: createProblemSchema.shape.url,
+  difficulty: createProblemSchema.shape.difficulty,
+  subTopicId: createProblemSchema.shape.subTopicId,
+  notes: createProblemSchema.shape.notes,
+});
 
 interface ProblemFormDialogProps {
   mode: "create" | "edit";
@@ -75,7 +84,7 @@ export function ProblemFormDialog({
 
   function handleSubmit() {
     setErrors({});
-    const schema = isEdit ? updateProblemSchema : createProblemSchema;
+    const schema = isEdit ? updateProblemSchema : createProblemFormSchema;
     const result = schema.safeParse({
       title: title.trim() || undefined,
       url: url.trim() || undefined,

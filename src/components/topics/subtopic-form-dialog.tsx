@@ -14,7 +14,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
+import { z } from "zod";
 import { createSubTopicSchema, updateSubTopicSchema } from "@/lib/schemas";
+
+const createSubTopicFormSchema = z.object({
+  name: createSubTopicSchema.shape.name,
+  description: createSubTopicSchema.shape.description,
+});
 
 interface SubtopicFormDialogProps {
   mode: "create" | "edit";
@@ -43,7 +49,7 @@ export function SubtopicFormDialog({
 
   function handleSubmit() {
     setErrors({});
-    const schema = isEdit ? updateSubTopicSchema : createSubTopicSchema;
+    const schema = isEdit ? updateSubTopicSchema : createSubTopicFormSchema;
     const result = schema.safeParse({
       name: name.trim() || undefined,
       description: description.trim() || undefined,
