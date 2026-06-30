@@ -9,40 +9,12 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { STATUS_STYLES, DIFFICULTY_STYLES } from "@/lib/constants";
+import { timeAgo } from "@/lib/date-utils";
 import type { RecentActivityEntry } from "@/lib/dashboard-data";
 
 interface RecentActivityProps {
   data: RecentActivityEntry[];
-}
-
-const STATUS_CLASSES: Record<string, string> = {
-  SOLVED:
-    "bg-emerald-500/10 text-emerald-600 border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-400",
-  ATTEMPTED:
-    "bg-amber-500/10 text-amber-600 border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-400",
-  MARKED_FOR_REVIEW:
-    "bg-violet-500/10 text-violet-600 border-violet-500/30 dark:bg-violet-500/15 dark:text-violet-400",
-  TODO: "border-dashed text-muted-foreground",
-};
-
-const DIFFICULTY_CLASSES: Record<string, string> = {
-  EASY:
-    "bg-emerald-500/10 text-emerald-600 border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-400",
-  MEDIUM:
-    "bg-amber-500/10 text-amber-600 border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-400",
-  HARD:
-    "bg-red-500/10 text-red-600 border-red-500/30 dark:bg-red-500/15 dark:text-red-400",
-};
-
-function timeAgo(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  if (days < 30) return `${days}d ago`;
-  return new Date(iso).toLocaleDateString();
 }
 
 export function RecentActivity({ data }: RecentActivityProps) {
@@ -80,17 +52,17 @@ export function RecentActivity({ data }: RecentActivityProps) {
                   <td className="hidden px-4 py-3 sm:table-cell">
                     <Badge
                       variant="outline"
-                      className={cn(STATUS_CLASSES[entry.status] ?? "")}
+                      className={cn(STATUS_STYLES[entry.status]?.className ?? "")}
                     >
-                      {entry.status.replace(/_/g, " ")}
+                      {STATUS_STYLES[entry.status]?.label ?? entry.status.replace(/_/g, " ")}
                     </Badge>
                   </td>
                   <td className="px-4 py-3">
                     <Badge
                       variant="outline"
-                      className={cn(DIFFICULTY_CLASSES[entry.difficulty] ?? "")}
+                      className={cn(DIFFICULTY_STYLES[entry.difficulty]?.className ?? "")}
                     >
-                      {entry.difficulty}
+                      {DIFFICULTY_STYLES[entry.difficulty]?.label ?? entry.difficulty}
                     </Badge>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">
