@@ -104,4 +104,11 @@ export type UpdateSubTopicInput = z.infer<typeof updateSubTopicSchema>;
 export type CreateProblemInput = z.infer<typeof createProblemSchema>;
 export type UpdateProblemInput = z.infer<typeof updateProblemSchema>;
 export type UpdateProblemStatusInput = z.infer<typeof updateProblemStatusSchema>;
+
+export const updateProblemReviewCountSchema = z.object({
+  reviewCount: z.number().int().min(0),
+});
+
+export type UpdateProblemReviewCountInput = z.infer<typeof updateProblemReviewCountSchema>;
+
 export type LogActivityInput = z.infer<typeof logActivitySchema>;
