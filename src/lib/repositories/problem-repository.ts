@@ -9,11 +9,23 @@ export interface ProblemScalarFields {
   difficulty: string;
   status: string;
   reviewCount: number;
+  sortOrder: number;
   notes: string | null;
   lastSolvedAt: Date | null;
   lastReviewedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
+}
+
+async function findMaxSortOrder(
+  topicId: string,
+  subTopicId?: string | null
+): Promise<number> {
+  const result = await prisma.problem.aggregate({
+    where: { topicId, subTopicId: subTopicId ?? null },
+    _max: { sortOrder: true },
+  });
+  return result._max.sortOrder ?? -1;
 }
 
 export async function createProblem(
@@ -26,6 +38,7 @@ export async function createProblem(
     notes?: string | null;
   }
 ): Promise<ProblemScalarFields> {
+  const maxOrder = await findMaxSortOrder(topicId, data.subTopicId ?? null);
   return prisma.problem.create({
     data: {
       topicId,
@@ -34,6 +47,7 @@ export async function createProblem(
       url: data.url ?? null,
       difficulty: data.difficulty as any,
       notes: data.notes ?? null,
+      sortOrder: maxOrder + 1,
     },
   });
 }
@@ -79,5 +93,15 @@ export async function updateProblemReviewCount(
   return prisma.problem.update({
     where: { id },
     data: { reviewCount, lastReviewedAt: new Date() },
+  });
+}
+
+export async function updateProblemSortOrder(
+  id: string,
+  sortOrder: number
+): Promise<ProblemScalarFields> {
+  return prisma.problem.update({
+    where: { id },
+    data: { sortOrder },
   });
 }

@@ -15,6 +15,7 @@ function mapProblem(p: problemRepo.ProblemScalarFields): ProblemStoreItem {
     difficulty: p.difficulty as ProblemStoreItem["difficulty"],
     status: p.status as ProblemStoreItem["status"],
     reviewCount: p.reviewCount,
+    sortOrder: p.sortOrder,
     notes: p.notes ?? undefined,
     solvedAt: p.lastSolvedAt?.toISOString() ?? undefined,
     subTopicId: p.subTopicId,
@@ -123,6 +124,23 @@ export async function updateProblemStatus(
     logger.error("Failed to update problem status", {
       problemId,
       status,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return null;
+  }
+}
+
+export async function reorderProblem(
+  problemId: string,
+  sortOrder: number
+): Promise<ProblemStoreItem | null> {
+  try {
+    const problem = await problemRepo.updateProblemSortOrder(problemId, sortOrder);
+    return mapProblem(problem);
+  } catch (error) {
+    logger.error("Failed to reorder problem", {
+      problemId,
+      sortOrder,
       error: error instanceof Error ? error.message : String(error),
     });
     return null;
