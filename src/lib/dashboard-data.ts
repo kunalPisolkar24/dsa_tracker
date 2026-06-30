@@ -1,5 +1,5 @@
 import type { TopicStoreItem } from "@/types/topics";
-import { getAllProblems } from "@/lib/topic-service";
+import { getAllProblems } from "@/lib/topic-utils";
 import { toDateStr } from "@/lib/date-utils";
 
 export interface DifficultyStats {
