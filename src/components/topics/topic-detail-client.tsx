@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { ChevronRight, Plus, ArrowLeft } from "lucide-react";
+import { Plus, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
@@ -159,17 +159,6 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
-      <nav className="mb-4 flex items-center gap-1.5 text-sm text-muted-foreground">
-        <Link
-          href="/topics"
-          className="underline-offset-2 hover:text-foreground hover:underline"
-        >
-          Topics
-        </Link>
-        <ChevronRight className="size-3.5" />
-        <span className="font-medium text-foreground">{topic.name}</span>
-      </nav>
-
       <div className="mb-2">
         <h1 className="text-2xl font-bold tracking-tight">{topic.name}</h1>
         {topic.description && (
