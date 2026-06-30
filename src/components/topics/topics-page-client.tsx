@@ -214,6 +214,7 @@ export function TopicsPageClient() {
       />
 
       <TopicFormDialog
+        key={editTarget?.id ?? "no-edit"}
         mode="edit"
         open={!!editTarget}
         onOpenChange={(open) => {
