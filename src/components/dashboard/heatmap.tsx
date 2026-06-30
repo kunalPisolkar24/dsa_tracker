@@ -157,6 +157,7 @@ export function Heatmap({ data }: HeatmapProps) {
                     <Tooltip key={i}>
                       <TooltipTrigger asChild>
                         <div
+                          suppressHydrationWarning
                           className={`rounded-sm ${cell.level} cursor-default`}
                           style={{ width: 14, height: 14 }}
                         />
