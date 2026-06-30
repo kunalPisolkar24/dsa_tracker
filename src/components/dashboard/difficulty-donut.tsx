@@ -47,7 +47,7 @@ export function DifficultyDonut({ breakdown }: DifficultyDonutProps) {
   const centerLabel =
     activeIndex !== null
       ? {
-          top: `Solved ${LABELS[pieData[activeIndex].name]}`,
+          top: LABELS[pieData[activeIndex].name],
           bottom: `${pieData[activeIndex].value} / ${pieData[activeIndex].total}`,
         }
       : {
