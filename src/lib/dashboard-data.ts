@@ -39,8 +39,11 @@ function generateHeatmapData(): HeatmapEntry[] {
   const now = new Date();
   const start = new Date(now.getFullYear() - 1, 0, 1);
   for (let d = new Date(start); d <= now; d.setDate(d.getDate() + 1)) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
     data.push({
-      date: d.toISOString().split("T")[0],
+      date: `${y}-${m}-${day}`,
       count: Math.random() < 0.6 ? 0 : Math.floor(Math.random() * 5) + 1,
     });
   }

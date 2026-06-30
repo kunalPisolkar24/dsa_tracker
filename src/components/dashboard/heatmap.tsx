@@ -39,6 +39,13 @@ function getLevel(count: number) {
 
 const DAY_LABELS = ["Mon", "", "Wed", "", "Fri", "", "Sun"];
 
+function toLocalDateStr(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 export function Heatmap({ data }: HeatmapProps) {
   const years = useMemo(() => {
     const set = new Set<number>();
@@ -57,17 +64,20 @@ export function Heatmap({ data }: HeatmapProps) {
 
     const dayMap = new Map<string, number>();
     data.forEach((d) => {
-      const date = new Date(d.date);
+      const date = new Date(d.date + "T00:00:00");
       if (date.getFullYear() === year) dayMap.set(d.date, d.count);
     });
 
+    const startDow = (start.getDay() + 6) % 7;
+
     const cells: { date: string; count: number; level: string }[] = [];
     const current = new Date(start);
-    const labels: { label: string; weekIndex: number }[] = [];
+    const labels: { label: string; col: number }[] = [];
     let lastMonth = -1;
 
+    let dayIndex = 0;
     while (current <= end) {
-      const dateStr = current.toISOString().split("T")[0];
+      const dateStr = toLocalDateStr(current);
       const count = dayMap.get(dateStr) ?? 0;
       const level = getLevel(count);
       cells.push({ date: dateStr, count, level: level.className });
@@ -75,15 +85,15 @@ export function Heatmap({ data }: HeatmapProps) {
       if (current.getMonth() !== lastMonth) {
         labels.push({
           label: current.toLocaleString("default", { month: "short" }),
-          weekIndex: Math.floor((current.getTime() - start.getTime()) / (7 * 86400000)),
+          col: Math.floor((dayIndex + startDow) / 7),
         });
         lastMonth = current.getMonth();
       }
 
       current.setDate(current.getDate() + 1);
+      dayIndex++;
     }
 
-    const startDow = (start.getDay() + 6) % 7;
     const paddedCells: ({ date: string; count: number; level: string } | null)[] = [
       ...Array(startDow).fill(null),
       ...cells,
@@ -128,7 +138,7 @@ export function Heatmap({ data }: HeatmapProps) {
                   <span
                     key={i}
                     className="absolute"
-                    style={{ left: m.weekIndex * 17 }}
+                    style={{ left: m.col * 17 }}
                   >
                     {m.label}
                   </span>
