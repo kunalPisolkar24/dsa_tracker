@@ -52,7 +52,7 @@ export function ReviewRadial({ solved, markedForReview }: ReviewRadialProps) {
               fill="none"
               stroke="#1e293b"
               strokeWidth={STROKE}
-              strokeLinecap="round"
+              strokeLinecap="butt"
             />
 
             {/* Solved arc - left */}
@@ -61,7 +61,7 @@ export function ReviewRadial({ solved, markedForReview }: ReviewRadialProps) {
               fill="none"
               stroke="#3b82f6"
               strokeWidth={STROKE}
-              strokeLinecap="round"
+              strokeLinecap="butt"
               className="cursor-pointer transition-all duration-200"
               style={{ opacity: hovered && hovered !== "solved" ? 0.3 : 1 }}
               onMouseEnter={() => setHovered("solved")}
@@ -74,7 +74,7 @@ export function ReviewRadial({ solved, markedForReview }: ReviewRadialProps) {
               fill="none"
               stroke="#93c5fd"
               strokeWidth={STROKE}
-              strokeLinecap="round"
+              strokeLinecap="butt"
               className="cursor-pointer transition-all duration-200"
               style={{ opacity: hovered && hovered !== "review" ? 0.3 : 1 }}
               onMouseEnter={() => setHovered("review")}
@@ -87,7 +87,7 @@ export function ReviewRadial({ solved, markedForReview }: ReviewRadialProps) {
             <div className="pointer-events-none absolute left-1/2 top-8 -translate-x-1/2 rounded-lg border bg-popover px-3 py-2 text-xs text-popover-foreground shadow-md">
               <div className="flex items-center gap-2">
                 <span className="size-2 rounded-full" style={{ backgroundColor: hovered === "solved" ? "#3b82f6" : "#93c5fd" }} />
-                <span className="font-medium">{hovered === "solved" ? "Solved" : "Marked for Review"}</span>
+                <span className="font-medium">{hovered === "solved" ? "Solved" : "Review"}</span>
                 <span className="text-muted-foreground">{hovered === "solved" ? solved : markedForReview}</span>
               </div>
             </div>
@@ -97,7 +97,7 @@ export function ReviewRadial({ solved, markedForReview }: ReviewRadialProps) {
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-end pb-2">
             <span className="text-4xl font-bold tracking-tight">{total}</span>
             <span className="text-sm text-muted-foreground">
-              {hovered === "solved" ? `${solved} solved` : `${markedForReview} marked for review`}
+              {hovered === "solved" ? `${solved} solved` : `${markedForReview} review`}
             </span>
           </div>
         </div>
