@@ -11,11 +11,10 @@ import { useTopicStore } from "@/stores/topic-store";
 export function TopNav() {
   const pathname = usePathname();
 
+  const topics = useTopicStore((s) => s.topics);
   const topicDetailMatch = pathname.match(/^\/topics\/([^/]+)$/);
   const topicId = topicDetailMatch?.[1];
-  const topic = topicId
-    ? useTopicStore((s) => s.topics.find((t) => t.id === topicId))
-    : null;
+  const topic = topicId ? topics.find((t) => t.id === topicId) : null;
 
   const currentItem = mainNavItems.find((item) => item.href === pathname);
 
