@@ -10,7 +10,6 @@ import type {
   CreateProblemInput,
   UpdateProblemInput,
 } from "@/lib/schemas";
-import { seedTopics } from "@/lib/seed-data";
 import {
   createTopicService,
   updateTopicService,
@@ -38,6 +37,7 @@ import {
 interface TopicStoreState {
   topics: TopicStoreItem[];
   hydrated: boolean;
+  hydrating: boolean;
   hydrationError: boolean;
 }
 
@@ -80,21 +80,23 @@ function findProblemContainer(
 }
 
 export const useTopicStore = create<TopicStore>((set, get) => ({
-  topics: seedTopics,
+  topics: [],
   hydrated: false,
+  hydrating: false,
   hydrationError: false,
 
   hydrate: async () => {
     if (get().hydrated) return;
+    set({ hydrating: true });
     try {
       const dbTopics = await fetchTopicsFromDb();
       if (dbTopics.length > 0) {
-        set({ topics: dbTopics, hydrated: true, hydrationError: false });
+        set({ topics: dbTopics, hydrated: true, hydrating: false, hydrationError: false });
       } else {
-        set({ hydrated: true, hydrationError: false });
+        set({ hydrated: true, hydrating: false, hydrationError: false });
       }
     } catch {
-      set({ hydrated: true, hydrationError: true });
+      set({ hydrated: true, hydrating: false, hydrationError: true });
     }
   },
 
