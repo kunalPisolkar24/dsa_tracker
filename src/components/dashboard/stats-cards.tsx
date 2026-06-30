@@ -82,8 +82,8 @@ export function StatsCards({ solvedToday, streak, weeklySolved }: StatsCardsProp
             <AreaChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--chart-2)" stopOpacity={0.3} />
-                  <stop offset="100%" stopColor="var(--chart-2)" stopOpacity={0.02} />
+                  <stop offset="0%" stopColor="var(--chart-2)" stopOpacity={0.5} />
+                  <stop offset="100%" stopColor="var(--chart-2)" stopOpacity={0.08} />
                 </linearGradient>
               </defs>
               <XAxis
@@ -104,7 +104,7 @@ export function StatsCards({ solvedToday, streak, weeklySolved }: StatsCardsProp
                 type="monotone"
                 dataKey="count"
                 stroke="var(--chart-2)"
-                strokeWidth={2}
+                strokeWidth={2.5}
                 fill="url(#areaGradient)"
                 dot={false}
                 activeDot={{
