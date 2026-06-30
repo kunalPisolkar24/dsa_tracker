@@ -39,7 +39,7 @@ export function RecentActivity({ data }: RecentActivityProps) {
             <tbody>
               {data.map((entry, index) => (
                 <tr
-                  key={entry.id}
+                  key={`${entry.id}-${entry.solvedAt}`}
                   className="border-b border-border transition-colors hover:bg-muted/50"
                 >
                   <td className="px-4 py-3 text-muted-foreground">{index + 1}</td>
