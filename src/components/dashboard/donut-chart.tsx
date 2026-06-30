@@ -9,6 +9,7 @@ interface DonutChartDataEntry {
   value: number;
   color: string;
   label?: string;
+  hoverDetail?: string;
 }
 
 interface DonutChartProps {
@@ -43,7 +44,7 @@ export function DonutChart({
     activeIndex !== null ? data[activeIndex].label ?? data[activeIndex].name : centerLabel;
   const displayBottom =
     activeIndex !== null
-      ? `${data[activeIndex].value} / ${total}`
+      ? (data[activeIndex].hoverDetail ?? `${data[activeIndex].value} / ${total}`)
       : centerSubtext ?? `${total}`;
 
   return (

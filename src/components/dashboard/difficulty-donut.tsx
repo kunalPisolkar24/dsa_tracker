@@ -9,15 +9,15 @@ interface DifficultyDonutProps {
 }
 
 export function DifficultyDonut({ breakdown }: DifficultyDonutProps) {
-  const totalSolved = Object.values(breakdown).reduce((acc, d) => acc + d.solved, 0);
   const totalProblems = Object.values(breakdown).reduce((acc, d) => acc + d.total, 0);
 
   const pieData = (Object.entries(breakdown) as [string, DifficultyStats][]).map(
     ([key, val]) => ({
       name: key,
-      value: val.solved,
+      value: val.total,
       color: CHART_COLORS[key as keyof typeof CHART_COLORS],
       label: key === "EASY" ? "Easy" : key === "MEDIUM" ? "Medium" : "Hard",
+      hoverDetail: `${val.solved} / ${val.total}`,
     })
   );
 
@@ -25,8 +25,8 @@ export function DifficultyDonut({ breakdown }: DifficultyDonutProps) {
     <DonutChart
       title="Problem Breakdown"
       data={pieData}
-      centerLabel="Solved"
-      centerSubtext={`${totalSolved} / ${totalProblems}`}
+      centerLabel="Total Problems"
+      centerSubtext={`${totalProblems}`}
     />
   );
 }
