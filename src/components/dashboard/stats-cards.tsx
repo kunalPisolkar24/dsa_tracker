@@ -66,7 +66,7 @@ export function StatsCards({ solvedToday, streak, weeklySolved }: StatsCardsProp
     <>
       <Card className="col-span-1 md:col-span-2">
         <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2 text-base text-foreground">
             <div className="flex size-8 items-center justify-center rounded-full bg-chart-2/15">
               <span className="text-sm font-bold text-chart-2">✓</span>
             </div>
@@ -90,14 +90,14 @@ export function StatsCards({ solvedToday, streak, weeklySolved }: StatsCardsProp
                 dataKey="label"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 11, fill: "hsl(var(--foreground))" }}
+                tick={{ fontSize: 11, fill: "#cbd5e1" }}
                 dy={4}
               />
               <YAxis
                 allowDecimals={false}
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 11, fill: "hsl(var(--foreground))" }}
+                tick={{ fontSize: 11, fill: "#cbd5e1" }}
               />
               <Tooltip content={<CustomTooltip />} cursor={false} />
               <Area
