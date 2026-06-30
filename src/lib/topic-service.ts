@@ -24,6 +24,14 @@ function generateId(): string {
   return crypto.randomUUID();
 }
 
+export function getAllProblems(topic: TopicStoreItem): ProblemStoreItem[] {
+  const all = [...topic.problems];
+  for (const subtopic of topic.subtopics) {
+    all.push(...subtopic.problems);
+  }
+  return all;
+}
+
 export function createTopicService(input: CreateTopicInput): TopicStoreItem {
   const parsed = createTopicSchema.parse(input);
   return {
@@ -87,14 +95,6 @@ export function computeTopicCardViewModel(
     solvedProblems,
     progressPercent,
   };
-}
-
-function getAllProblems(topic: TopicStoreItem): ProblemStoreItem[] {
-  const all = [...topic.problems];
-  for (const subtopic of topic.subtopics) {
-    all.push(...subtopic.problems);
-  }
-  return all;
 }
 
 export function computeSubtopicViewModel(
@@ -185,10 +185,3 @@ export function moveProblemInArray(
   [copy[idx], copy[targetIdx]] = [copy[targetIdx], copy[idx]];
   return copy;
 }
-
-export const STATUS_CYCLE: ProblemStoreItem["status"][] = [
-  "TODO",
-  "SOLVED",
-  "ATTEMPTED",
-  "MARKED_FOR_REVIEW",
-];
