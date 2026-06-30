@@ -14,12 +14,12 @@ export function DashboardShell() {
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
-      <div className="grid grid-cols-1 items-stretch gap-6 md:grid-cols-3">
+      <div className="grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 md:grid-cols-3">
         <StatsCards solvedToday={data.solvedToday} weeklySolved={data.weeklySolved} />
         <DifficultyDonut breakdown={data.difficultyBreakdown} />
       </div>
 
-      <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-2">
         <TopicRadar data={data.topicRadar} />
         <ReviewRadial
           solved={data.reviewStats.solved}

@@ -64,7 +64,7 @@ export function RecentActivity({ data }: RecentActivityProps) {
                   className="border-b border-border transition-colors hover:bg-muted/50"
                 >
                   <td className="px-4 py-3 text-muted-foreground">{index + 1}</td>
-                  <td className="px-4 py-3 font-medium">{entry.title}</td>
+                  <td className="max-w-0 truncate px-4 py-3 font-medium" title={entry.title}>{entry.title}</td>
                   <td className="hidden px-4 py-3 sm:table-cell">
                     <Badge variant={STATUS_VARIANTS[entry.status] ?? "outline"}>
                       {entry.status.replace(/_/g, " ")}

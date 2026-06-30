@@ -127,20 +127,20 @@ export function Heatmap({ data, streak, maxStreak }: HeatmapProps) {
       <CardContent>
         <div className="overflow-x-auto">
           <div className="flex gap-1">
-            <div className="flex flex-col gap-[3px] pt-5 pr-1">
-              {DAY_LABELS.map((label, i) => (
-                <div key={i} className="h-[14px] text-[10px] leading-[14px] text-muted-foreground">
-                  {label}
-                </div>
-              ))}
-            </div>
+              <div className="flex flex-col gap-[3px] pt-5 pr-1">
+                {DAY_LABELS.map((label, i) => (
+                  <div key={i} className="text-[10px] text-muted-foreground" style={{ height: 'clamp(14px, 2vw, 18px)', lineHeight: 'clamp(14px, 2vw, 18px)' }}>
+                    {label}
+                  </div>
+                ))}
+              </div>
             <div className="flex-1">
-              <div className="relative text-[10px] text-muted-foreground mb-1" style={{ height: 14 }}>
+              <div className="relative text-[10px] text-muted-foreground mb-1" style={{ height: 'clamp(14px, 2vw, 18px)' }}>
                 {monthLabels.map((m, i) => (
                   <span
                     key={i}
                     className="absolute"
-                    style={{ left: m.col * 17 }}
+                    style={{ left: `calc(${m.col} * (clamp(14px, 2vw, 18px) + 3px))` }}
                   >
                     {m.label}
                   </span>
@@ -149,8 +149,8 @@ export function Heatmap({ data, streak, maxStreak }: HeatmapProps) {
               <div
                 className="grid gap-[3px]"
                 style={{
-                  gridTemplateColumns: `repeat(${Math.ceil(grid.length / 7)}, 14px)`,
-                  gridTemplateRows: "repeat(7, 14px)",
+                  gridTemplateColumns: `repeat(${Math.ceil(grid.length / 7)}, clamp(14px, 2vw, 18px))`,
+                  gridTemplateRows: `repeat(7, clamp(14px, 2vw, 18px))`,
                   gridAutoFlow: "column",
                 }}
               >
@@ -161,7 +161,7 @@ export function Heatmap({ data, streak, maxStreak }: HeatmapProps) {
                         <div
                           suppressHydrationWarning
                           className={`rounded-sm ${cell.level} cursor-default`}
-                          style={{ width: 14, height: 14 }}
+                          style={{ width: 'clamp(14px, 2vw, 18px)', height: 'clamp(14px, 2vw, 18px)' }}
                         />
                       </TooltipTrigger>
                       <TooltipContent side="top" className="text-xs">
@@ -175,7 +175,7 @@ export function Heatmap({ data, streak, maxStreak }: HeatmapProps) {
                       </TooltipContent>
                     </Tooltip>
                   ) : (
-                    <div key={i} style={{ width: 14, height: 14 }} />
+                    <div key={i} style={{ width: 'clamp(14px, 2vw, 18px)', height: 'clamp(14px, 2vw, 18px)' }} />
                   )
                 )}
               </div>
