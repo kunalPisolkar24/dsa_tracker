@@ -133,6 +133,7 @@ export function Heatmap({ data }: HeatmapProps) {
                 style={{
                   gridTemplateColumns: `repeat(${Math.ceil(grid.length / 7)}, 14px)`,
                   gridTemplateRows: "repeat(7, 14px)",
+                  gridAutoFlow: "column",
                 }}
               >
                 {grid.map((cell, i) => (
