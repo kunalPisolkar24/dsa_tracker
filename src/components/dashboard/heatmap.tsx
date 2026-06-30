@@ -117,12 +117,12 @@ export function Heatmap({ data }: HeatmapProps) {
               ))}
             </div>
             <div className="flex-1">
-              <div className="flex gap-[3px] text-[10px] text-muted-foreground mb-1">
+              <div className="relative text-[10px] text-muted-foreground mb-1" style={{ height: 14 }}>
                 {monthLabels.map((m, i) => (
                   <span
                     key={i}
-                    className="block"
-                    style={{ marginLeft: i === 0 ? 0 : undefined }}
+                    className="absolute"
+                    style={{ left: m.weekIndex * 17 }}
                   >
                     {m.label}
                   </span>
