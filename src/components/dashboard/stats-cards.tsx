@@ -63,7 +63,7 @@ export function StatsCards({ solvedToday, weeklySolved }: StatsCardsProps) {
 
   return (
     <>
-      <Card className="col-span-1 md:col-span-2">
+      <Card className="flex flex-col col-span-1 md:col-span-2">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-base text-foreground">
             <div className="flex size-8 items-center justify-center rounded-full bg-chart-2/15">
@@ -76,8 +76,8 @@ export function StatsCards({ solvedToday, weeklySolved }: StatsCardsProps) {
             <span className="text-xs text-foreground/60">today</span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="pt-0">
-          <ResponsiveContainer width="100%" height={140}>
+        <CardContent className="flex-1 pt-0">
+          <ResponsiveContainer width="100%" height={260}>
             <AreaChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">

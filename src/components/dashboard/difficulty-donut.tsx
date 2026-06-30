@@ -56,11 +56,11 @@ export function DifficultyDonut({ breakdown }: DifficultyDonutProps) {
         };
 
   return (
-    <Card>
+    <Card className="flex flex-col">
       <CardHeader>
         <CardTitle>Problem Breakdown</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1">
         <div className="relative">
           <ResponsiveContainer width="100%" height={260}>
             <PieChart>
