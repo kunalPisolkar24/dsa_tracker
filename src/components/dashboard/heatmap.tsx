@@ -83,7 +83,13 @@ export function Heatmap({ data }: HeatmapProps) {
       current.setDate(current.getDate() + 1);
     }
 
-    return { grid: cells, monthLabels: labels };
+    const startDow = (start.getDay() + 6) % 7;
+    const paddedCells: ({ date: string; count: number; level: string } | null)[] = [
+      ...Array(startDow).fill(null),
+      ...cells,
+    ];
+
+    return { grid: paddedCells, monthLabels: labels };
   }, [data, selectedYear]);
 
   return (
@@ -136,25 +142,29 @@ export function Heatmap({ data }: HeatmapProps) {
                   gridAutoFlow: "column",
                 }}
               >
-                {grid.map((cell, i) => (
-                  <Tooltip key={i}>
-                    <TooltipTrigger asChild>
-                      <div
-                        className={`rounded-sm ${cell.level} cursor-default`}
-                        style={{ width: 14, height: 14 }}
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="text-xs">
-                      {cell.count} {cell.count === 1 ? "problem" : "problems"} solved on{" "}
-                      {new Date(cell.date).toLocaleDateString("en-US", {
-                        weekday: "short",
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </TooltipContent>
-                  </Tooltip>
-                ))}
+                {grid.map((cell, i) =>
+                  cell ? (
+                    <Tooltip key={i}>
+                      <TooltipTrigger asChild>
+                        <div
+                          className={`rounded-sm ${cell.level} cursor-default`}
+                          style={{ width: 14, height: 14 }}
+                        />
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs">
+                        {cell.count} {cell.count === 1 ? "problem" : "problems"} solved on{" "}
+                        {new Date(cell.date).toLocaleDateString("en-US", {
+                          weekday: "short",
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </TooltipContent>
+                    </Tooltip>
+                  ) : (
+                    <div key={i} style={{ width: 14, height: 14 }} />
+                  )
+                )}
               </div>
             </div>
           </div>
