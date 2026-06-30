@@ -14,13 +14,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
-import type { CreateTopicInput, UpdateTopicInput } from "@/lib/schemas";
+import { createTopicSchema, updateTopicSchema } from "@/lib/schemas";
+import type { CreateTopicInput } from "@/lib/schemas";
 
 interface TopicFormDialogProps {
   mode: "create" | "edit";
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (input: CreateTopicInput | UpdateTopicInput) => void;
+  onSubmit: (input: CreateTopicInput) => void;
   initialValues?: {
     name: string;
     description?: string;
@@ -47,16 +48,21 @@ export function TopicFormDialog({
 
   function handleSubmit() {
     setErrors({});
-    if (!name.trim()) {
-      setErrors({ name: "Topic name is required" });
+    const schema = isEdit ? updateTopicSchema : createTopicSchema;
+    const result = schema.safeParse({
+      name: name.trim() || undefined,
+      description: description.trim() || undefined,
+    });
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors;
+      if (fieldErrors.name?.[0]) {
+        setErrors({ name: fieldErrors.name[0] });
+      }
       return;
     }
     setIsSubmitting(true);
     try {
-      onSubmit({
-        name: name.trim(),
-        description: description.trim() || undefined,
-      } as CreateTopicInput | UpdateTopicInput);
+      onSubmit(result.data as CreateTopicInput);
       setName("");
       setDescription("");
       onOpenChange(false);

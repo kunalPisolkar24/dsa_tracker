@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
+import { createProblemSchema, updateProblemSchema } from "@/lib/schemas";
 import type { SubTopicStoreItem } from "@/types/topics";
 
 interface ProblemFormDialogProps {
@@ -74,13 +75,22 @@ export function ProblemFormDialog({
 
   function handleSubmit() {
     setErrors({});
-    const fieldErrors: typeof errors = {};
-    if (!title.trim()) fieldErrors.title = "Problem title is required";
-    if (url.trim() && !/^https?:\/\/.+/.test(url.trim())) {
-      fieldErrors.url = "Invalid URL (must start with http:// or https://)";
-    }
-    if (Object.keys(fieldErrors).length > 0) {
-      setErrors(fieldErrors);
+    const schema = isEdit ? updateProblemSchema : createProblemSchema;
+    const result = schema.safeParse({
+      title: title.trim() || undefined,
+      url: url.trim() || undefined,
+      difficulty,
+      subTopicId: subTopicId || undefined,
+      notes: notes.trim() || undefined,
+    });
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors;
+      const newErrors: typeof errors = {};
+      if (fieldErrors.title?.[0]) newErrors.title = fieldErrors.title[0];
+      if (fieldErrors.url?.[0]) newErrors.url = fieldErrors.url[0];
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+      }
       return;
     }
     setIsSubmitting(true);

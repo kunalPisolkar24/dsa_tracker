@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
+import { createSubTopicSchema, updateSubTopicSchema } from "@/lib/schemas";
 
 interface SubtopicFormDialogProps {
   mode: "create" | "edit";
@@ -42,15 +43,23 @@ export function SubtopicFormDialog({
 
   function handleSubmit() {
     setErrors({});
-    if (!name.trim()) {
-      setErrors({ name: "Sub-topic name is required" });
+    const schema = isEdit ? updateSubTopicSchema : createSubTopicSchema;
+    const result = schema.safeParse({
+      name: name.trim() || undefined,
+      description: description.trim() || undefined,
+    });
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors;
+      if (fieldErrors.name?.[0]) {
+        setErrors({ name: fieldErrors.name[0] });
+      }
       return;
     }
     setIsSubmitting(true);
     try {
       onSubmit({
-        name: name.trim(),
-        description: description.trim() || undefined,
+        name: result.data.name ?? name.trim(),
+        description: result.data.description ?? (description.trim() || undefined),
       });
       if (!isEdit) {
         setName("");
