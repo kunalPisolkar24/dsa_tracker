@@ -13,7 +13,6 @@ import type { WeeklySolvedEntry } from "@/lib/dashboard-data";
 
 interface StatsCardsProps {
   solvedToday: number;
-  streak: number;
   weeklySolved: WeeklySolvedEntry[];
 }
 
@@ -54,7 +53,7 @@ function CustomTooltip({
   );
 }
 
-export function StatsCards({ solvedToday, streak, weeklySolved }: StatsCardsProps) {
+export function StatsCards({ solvedToday, weeklySolved }: StatsCardsProps) {
   const chartData = weeklySolved.map((entry) => ({
     ...entry,
     label: new Date(entry.date + "T00:00:00").toLocaleDateString("en-US", {
@@ -116,19 +115,6 @@ export function StatsCards({ solvedToday, streak, weeklySolved }: StatsCardsProp
               />
             </AreaChart>
           </ResponsiveContainer>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="flex items-center gap-4 pt-6">
-          <div className="flex size-12 items-center justify-center rounded-full bg-orange-500/15">
-            <span className="text-lg">🔥</span>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Day Streak</p>
-            <p className="text-3xl font-bold tracking-tight">{streak}</p>
-            <p className="text-xs text-muted-foreground">consecutive days</p>
-          </div>
         </CardContent>
       </Card>
     </>

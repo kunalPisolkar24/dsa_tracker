@@ -20,6 +20,8 @@ import type { HeatmapEntry } from "@/lib/dashboard-data";
 
 interface HeatmapProps {
   data: HeatmapEntry[];
+  streak: number;
+  maxStreak: number;
 }
 
 const LEVELS = [
@@ -46,7 +48,7 @@ function toLocalDateStr(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
-export function Heatmap({ data }: HeatmapProps) {
+export function Heatmap({ data, streak, maxStreak }: HeatmapProps) {
   const years = useMemo(() => {
     const set = new Set<number>();
     data.forEach((d) => set.add(new Date(d.date).getFullYear()));
@@ -180,15 +182,29 @@ export function Heatmap({ data }: HeatmapProps) {
             </div>
           </div>
         </div>
-        <div className="mt-3 flex items-center justify-end gap-1 text-xs text-muted-foreground">
-          <span>Less</span>
-          {LEVELS.map((level, i) => (
-            <div
-              key={i}
-              className={`size-3 rounded-sm ${level.className}`}
-            />
-          ))}
-          <span>More</span>
+        <div className="mt-3 flex items-center justify-between gap-2 text-xs">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 rounded-md border border-border bg-muted/50 px-2 py-0.5 text-foreground">
+              <span className="leading-none">🔥</span>
+              <span className="font-medium">{streak}</span>
+              <span className="text-muted-foreground">day streak</span>
+            </div>
+            <div className="flex items-center gap-1 rounded-md border border-border bg-muted/50 px-2 py-0.5 text-foreground">
+              <span className="leading-none">🏆</span>
+              <span className="font-medium">{maxStreak}</span>
+              <span className="text-muted-foreground">max</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <span>Less</span>
+            {LEVELS.map((level, i) => (
+              <div
+                key={i}
+                className={`size-3 rounded-sm ${level.className}`}
+              />
+            ))}
+            <span>More</span>
+          </div>
         </div>
       </CardContent>
     </Card>

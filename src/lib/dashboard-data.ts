@@ -30,6 +30,7 @@ export interface WeeklySolvedEntry {
 export interface DashboardData {
   solvedToday: number;
   streak: number;
+  maxStreak: number;
   weeklySolved: WeeklySolvedEntry[];
   difficultyBreakdown: Record<"EASY" | "MEDIUM" | "HARD", DifficultyStats>;
   totalSolved: number;
@@ -77,6 +78,7 @@ export function getDashboardData(): DashboardData {
   return {
     solvedToday: 5,
     streak: 12,
+    maxStreak: 24,
     weeklySolved: generateWeeklySolvedData(),
     difficultyBreakdown: {
       EASY: { solved: 25, total: 40 },
