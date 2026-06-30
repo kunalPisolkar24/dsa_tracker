@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { ChevronsUpDown, LogOut, Code2, PanelLeftClose } from "lucide-react";
+import { ChevronsUpDown, LogOut } from "lucide-react";
 
 import {
   Sidebar,
@@ -12,13 +12,10 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarHeader,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-  useSidebar,
 } from "@/components/ui/sidebar";
 import {
   DropdownMenu,
@@ -55,30 +52,9 @@ function getInitials(name: string): string {
 export function AppSidebar({ user, navItems }: AppSidebarProps) {
   const pathname = usePathname();
   const setActiveNav = useUIStore((s) => s.setActiveNav);
-  const { toggleSidebar } = useSidebar();
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <Link href="/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Code2 className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">DSA Tracker</span>
-                </div>
-              </Link>
-            </SidebarMenuButton>
-            <SidebarMenuAction onClick={toggleSidebar}>
-              <PanelLeftClose className="size-4" />
-            </SidebarMenuAction>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
