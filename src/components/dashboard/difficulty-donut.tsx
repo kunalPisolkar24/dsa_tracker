@@ -71,6 +71,7 @@ export function DifficultyDonut({ breakdown }: DifficultyDonutProps) {
                 innerRadius={72}
                 outerRadius={100}
                 paddingAngle={3}
+                cornerRadius={3}
                 dataKey="value"
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
