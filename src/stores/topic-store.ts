@@ -10,6 +10,7 @@ import type {
   CreateProblemInput,
   UpdateProblemInput,
 } from "@/lib/schemas";
+import { seedTopics } from "@/lib/seed-data";
 import {
   createTopicService,
   updateTopicService,
@@ -62,7 +63,7 @@ function findProblemContainer(
 }
 
 export const useTopicStore = create<TopicStore>((set) => ({
-  topics: [],
+  topics: seedTopics,
 
   addTopic: (input) => {
     const newTopic = createTopicService(input);
