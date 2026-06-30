@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma/client";
 
 const subTopicInclude = {
-  problems: true,
+  problems: { orderBy: { sortOrder: "asc" } },
 } satisfies Prisma.SubTopicInclude;
 
 export type SubTopicWithRelations = Prisma.SubTopicGetPayload<{ include: typeof subTopicInclude }>;

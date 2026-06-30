@@ -2,8 +2,10 @@ import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma/client";
 
 export const topicInclude = {
-  subTopics: { include: { problems: true } },
-  problems: true,
+  subTopics: {
+    include: { problems: { orderBy: { sortOrder: "asc" } } },
+  },
+  problems: { orderBy: { sortOrder: "asc" } },
 } satisfies Prisma.TopicInclude;
 
 export type TopicWithRelations = Prisma.TopicGetPayload<{ include: typeof topicInclude }>;

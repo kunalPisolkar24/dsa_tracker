@@ -11,6 +11,7 @@ export function mapPrismaProblem(p: {
   difficulty: string;
   status: string;
   reviewCount: number;
+  sortOrder: number;
   notes: string | null;
   lastSolvedAt: Date | null;
   subTopicId: string | null;
@@ -22,6 +23,7 @@ export function mapPrismaProblem(p: {
     difficulty: p.difficulty as ProblemStoreItem["difficulty"],
     status: p.status as ProblemStoreItem["status"],
     reviewCount: p.reviewCount,
+    sortOrder: p.sortOrder,
     notes: p.notes ?? undefined,
     solvedAt: p.lastSolvedAt?.toISOString() ?? undefined,
     subTopicId: p.subTopicId,
@@ -43,6 +45,7 @@ export function mapPrismaTopic(t: {
       difficulty: string;
       status: string;
       reviewCount: number;
+      sortOrder: number;
       notes: string | null;
       lastSolvedAt: Date | null;
       subTopicId: string | null;
@@ -55,6 +58,7 @@ export function mapPrismaTopic(t: {
     difficulty: string;
     status: string;
     reviewCount: number;
+    sortOrder: number;
     notes: string | null;
     lastSolvedAt: Date | null;
     subTopicId: string | null;
@@ -85,6 +89,7 @@ export function mapPrismaSubTopic(st: {
     difficulty: string;
     status: string;
     reviewCount: number;
+    sortOrder: number;
     notes: string | null;
     lastSolvedAt: Date | null;
     subTopicId: string | null;
