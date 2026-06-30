@@ -12,6 +12,7 @@ import {
   computeTopicCardViewModel,
   computeSubtopicViewModel,
 } from "@/lib/topic-service";
+import { LAYOUT } from "@/lib/constants";
 import type {
   SubTopicStoreItem,
   ProblemStoreItem,
@@ -158,7 +159,7 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
   const hasAnyContent = hasSubtopics || hasDirectProblems;
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
+    <div className={`mx-auto flex w-full ${LAYOUT.DETAIL_MAX_WIDTH} flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8`}>
       <div className="mb-2">
         <h1 className="text-2xl font-bold tracking-tight">{topic.name}</h1>
         {topic.description && (

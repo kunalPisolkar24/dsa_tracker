@@ -19,13 +19,12 @@ import {
   paginateTopics,
   computeTopicCardViewModel,
 } from "@/lib/topic-service";
-import type { CreateTopicInput, UpdateTopicInput } from "@/lib/schemas";
+import { LAYOUT } from "@/lib/constants";
+import type { CreateTopicInput } from "@/lib/schemas";
 import { TopicCard } from "@/components/topics/topic-card";
 import { TopicSearch } from "@/components/topics/topic-search";
 import { TopicFormDialog } from "@/components/topics/topic-form-dialog";
 import { DeleteTopicDialog } from "@/components/topics/delete-topic-dialog";
-
-const PAGE_SIZE = 6;
 
 export function TopicsPageClient() {
   const router = useRouter();
@@ -50,7 +49,7 @@ export function TopicsPageClient() {
     const timer = setTimeout(() => {
       setDebouncedQuery(searchQuery);
       setPage(1);
-    }, 300);
+    }, LAYOUT.DEBOUNCE_MS);
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
@@ -58,17 +57,17 @@ export function TopicsPageClient() {
   const { items: paginatedTopics, totalPages, currentPage } = paginateTopics(
     filteredTopics,
     page,
-    PAGE_SIZE
+    LAYOUT.PAGE_SIZE
   );
 
-  function handleCreate(input: CreateTopicInput | UpdateTopicInput) {
-    addTopic(input as CreateTopicInput);
+  function handleCreate(input: CreateTopicInput) {
+    addTopic(input);
     toast.success("Topic created successfully");
   }
 
-  function handleEdit(input: CreateTopicInput | UpdateTopicInput) {
+  function handleEdit(input: CreateTopicInput) {
     if (!editTarget) return;
-    updateTopic(editTarget.id, input as UpdateTopicInput);
+    updateTopic(editTarget.id, input);
     setEditTarget(null);
     toast.success("Topic updated successfully");
   }
@@ -88,7 +87,7 @@ export function TopicsPageClient() {
   const hasFilteredResults = paginatedTopics.length > 0;
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
+    <div className={`mx-auto flex w-full ${LAYOUT.MAX_WIDTH} flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8`}>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Topics</h1>
