@@ -21,9 +21,19 @@ export interface ProblemStoreItem {
   status: "TODO" | "ATTEMPTED" | "SOLVED" | "MARKED_FOR_REVIEW";
   subTopicId?: string | null;
   notes?: string;
+  reviewCount: number;
 }
 
 export interface TopicCardViewModel {
+  id: string;
+  name: string;
+  description?: string;
+  totalProblems: number;
+  solvedProblems: number;
+  progressPercent: number;
+}
+
+export interface SubtopicViewModel {
   id: string;
   name: string;
   description?: string;
