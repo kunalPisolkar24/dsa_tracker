@@ -46,7 +46,10 @@ export function SubtopicSection({
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
         <div className="flex items-start justify-between gap-2">
           <CollapsibleTrigger asChild>
-            <button className="group flex min-w-0 flex-1 cursor-pointer items-start gap-2 text-left">
+            <button
+              className="group flex min-w-0 flex-1 cursor-pointer items-start gap-2 text-left"
+              aria-expanded={isExpanded}
+            >
               <ChevronDown
                 className={cn(
                   "mt-0.5 size-4 shrink-0 text-muted-foreground transition-transform",

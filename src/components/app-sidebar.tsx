@@ -129,7 +129,7 @@ export function AppSidebar({ user, navItems }: AppSidebarProps) {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  onClick={() => signOut({ redirectTo: "/" })}
+                  onClick={() => signOut({ redirectTo: "/" }).catch(() => {})}
                 >
                   <LogOut />
                   Sign out
