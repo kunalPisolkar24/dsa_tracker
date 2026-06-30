@@ -7,10 +7,12 @@ import { TopicRadar } from "@/components/dashboard/topic-radar";
 import { ReviewRadial } from "@/components/dashboard/review-radial";
 import { Heatmap } from "@/components/dashboard/heatmap";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
-import { getDashboardData } from "@/lib/dashboard-data";
+import { useTopicStore } from "@/stores/topic-store";
+import { computeDashboardData } from "@/lib/dashboard-data";
 
 export function DashboardShell() {
-  const data = useMemo(() => getDashboardData(), []);
+  const topics = useTopicStore((s) => s.topics);
+  const data = useMemo(() => computeDashboardData(topics), [topics]);
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
