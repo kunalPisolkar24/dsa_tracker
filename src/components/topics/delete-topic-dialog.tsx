@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,6 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Loader2 } from "lucide-react";
 
 interface DeleteTopicDialogProps {
   open: boolean;
@@ -24,6 +26,17 @@ export function DeleteTopicDialog({
   topicName,
   onConfirm,
 }: DeleteTopicDialogProps) {
+  const [isPending, setIsPending] = useState(false);
+
+  async function handleConfirm() {
+    setIsPending(true);
+    try {
+      await Promise.resolve(onConfirm());
+    } finally {
+      setIsPending(false);
+    }
+  }
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
@@ -36,11 +49,13 @@ export function DeleteTopicDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             variant="destructive"
-            onClick={onConfirm}
+            onClick={handleConfirm}
+            disabled={isPending}
           >
+            {isPending && <Loader2 className="mr-1 size-3 animate-spin" />}
             Delete
           </AlertDialogAction>
         </AlertDialogFooter>
