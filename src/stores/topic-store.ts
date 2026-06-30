@@ -43,7 +43,7 @@ interface TopicStoreActions {
   removeProblem: (topicId: string, problemId: string) => void;
   updateProblemStatus: (topicId: string, problemId: string, status: ProblemStoreItem["status"]) => void;
   updateProblemReviewCount: (topicId: string, problemId: string, reviewCount: number) => void;
-  moveProblem: (topicId: string, problemId: string, direction: "up" | "down") => void;
+  moveProblem: (topicId: string, problemId: string, direction: "up" | "down") => Promise<void>;
 }
 
 type TopicStore = TopicStoreState & TopicStoreActions;
@@ -394,33 +394,49 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
     });
   },
 
-  moveProblem: (topicId, problemId, direction) => {
-    set((state) => {
-      const container = findProblemContainer(state.topics, topicId, problemId);
-      if (!container) return state;
+  moveProblem: async (topicId, problemId, direction) => {
+    const snapshot = get().topics;
+    const container = findProblemContainer(snapshot, topicId, problemId);
+    if (!container) return;
+    const { topicIdx, subTopicIdx, problemIdx } = container;
 
-      return {
-        topics: state.topics.map((t, ti) => {
-          if (ti !== container.topicIdx) return t;
-          if (container.subTopicIdx === null) {
-            return {
-              ...t,
-              problems: moveProblemInArray(t.problems, problemId, direction),
-            };
-          }
+    const problems = subTopicIdx === null
+      ? snapshot[topicIdx].problems
+      : snapshot[topicIdx].subtopics[subTopicIdx].problems;
+
+    const targetIdx = direction === "up" ? problemIdx - 1 : problemIdx + 1;
+    if (targetIdx < 0 || targetIdx >= problems.length) return;
+
+    const movingProblem = problems[problemIdx];
+    const targetProblem = problems[targetIdx];
+
+    set((state) => ({
+      topics: state.topics.map((t, ti) => {
+        if (ti !== topicIdx) return t;
+        if (subTopicIdx === null) {
           return {
             ...t,
-            subtopics: t.subtopics.map((s, si) =>
-              si !== container.subTopicIdx
-                ? s
-                : {
-                    ...s,
-                    problems: moveProblemInArray(s.problems, problemId, direction),
-                  }
-            ),
+            problems: moveProblemInArray(t.problems, problemId, direction),
           };
-        }),
-      };
-    });
+        }
+        return {
+          ...t,
+          subtopics: t.subtopics.map((s, si) =>
+            si !== subTopicIdx
+              ? s
+              : { ...s, problems: moveProblemInArray(s.problems, problemId, direction) }
+          ),
+        };
+      }),
+    }));
+
+    const [res1, res2] = await Promise.all([
+      problemService.reorderProblem(problemId, targetProblem.sortOrder),
+      problemService.reorderProblem(targetProblem.id, movingProblem.sortOrder),
+    ]);
+
+    if (!res1 || !res2) {
+      set({ topics: snapshot });
+    }
   },
 }));
