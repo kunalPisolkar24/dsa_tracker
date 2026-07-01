@@ -143,8 +143,14 @@ export function updateSubTopicService(
   };
 }
 
-export function createProblemService(input: CreateProblemInput): ProblemStoreItem {
+export function createProblemService(
+  input: CreateProblemInput,
+  existingProblems?: Pick<ProblemStoreItem, "sortOrder">[]
+): ProblemStoreItem {
   const parsed = createProblemSchema.parse(input);
+  const maxSortOrder = existingProblems && existingProblems.length > 0
+    ? Math.max(...existingProblems.map((p) => p.sortOrder))
+    : -1;
   return {
     id: generateId(),
     title: parsed.title,
@@ -154,7 +160,7 @@ export function createProblemService(input: CreateProblemInput): ProblemStoreIte
     subTopicId: parsed.subTopicId || null,
     notes: parsed.notes,
     reviewCount: 0,
-    sortOrder: 0,
+    sortOrder: maxSortOrder + 1,
   };
 }
 

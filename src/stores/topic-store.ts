@@ -193,7 +193,13 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
 
   addProblem: (topicId, input) => {
     const snapshot = get().topics;
-    const newProblem = createProblemService({ ...input, topicId });
+    const topic = get().topics.find((t) => t.id === topicId);
+    const existingProblems = topic
+      ? input.subTopicId
+        ? topic.subtopics.find((s) => s.id === input.subTopicId)?.problems
+        : topic.problems
+      : undefined;
+    const newProblem = createProblemService({ ...input, topicId }, existingProblems);
     set((state) => ({
       topics: state.topics.map((t) => {
         if (t.id !== topicId) return t;
@@ -481,54 +487,70 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
     });
   },
 
-  moveProblem: async (topicId, problemId, direction) => {
-    const container = findProblemContainer(get().topics, topicId, problemId);
-    if (!container) return;
-    const { topicIdx, subTopicIdx, problemIdx } = container;
+  moveProblem: (() => {
+    let reorderTimer: ReturnType<typeof setTimeout> | null = null;
+    let pendingProblemIds: string[] = [];
 
-    const problems = subTopicIdx === null
-      ? get().topics[topicIdx].problems
-      : get().topics[topicIdx].subtopics[subTopicIdx].problems;
+    return async function moveProblem(
+      this: void,
+      topicId: string,
+      problemId: string,
+      direction: "up" | "down"
+    ) {
+      const container = findProblemContainer(get().topics, topicId, problemId);
+      if (!container) return;
+      const { topicIdx, subTopicIdx, problemIdx } = container;
 
-    const targetIdx = direction === "up" ? problemIdx - 1 : problemIdx + 1;
-    if (targetIdx < 0 || targetIdx >= problems.length) return;
+      const problems = subTopicIdx === null
+        ? get().topics[topicIdx].problems
+        : get().topics[topicIdx].subtopics[subTopicIdx].problems;
 
-    const movingProblem = problems[problemIdx];
-    const targetProblem = problems[targetIdx];
+      const targetIdx = direction === "up" ? problemIdx - 1 : problemIdx + 1;
+      if (targetIdx < 0 || targetIdx >= problems.length) return;
 
-    set((state) => ({
-      topics: state.topics.map((t, ti) => {
-        if (ti !== topicIdx) return t;
-        if (subTopicIdx === null) {
+      set((state) => ({
+        topics: state.topics.map((t, ti) => {
+          if (ti !== topicIdx) return t;
+          if (subTopicIdx === null) {
+            return {
+              ...t,
+              problems: moveProblemInArray(t.problems, problemId, direction),
+            };
+          }
           return {
             ...t,
-            problems: moveProblemInArray(t.problems, problemId, direction),
+            subtopics: t.subtopics.map((s, si) =>
+              si !== subTopicIdx
+                ? s
+                : { ...s, problems: moveProblemInArray(s.problems, problemId, direction) }
+            ),
           };
-        }
-        return {
-          ...t,
-          subtopics: t.subtopics.map((s, si) =>
-            si !== subTopicIdx
-              ? s
-              : { ...s, problems: moveProblemInArray(s.problems, problemId, direction) }
-          ),
-        };
-      }),
-    }));
+        }),
+      }));
 
-    const updatedState = get().topics;
-    const updatedProblems = (subTopicIdx === null
-      ? updatedState[topicIdx].problems
-      : updatedState[topicIdx].subtopics[subTopicIdx].problems
-    ).map((p) => p.id);
+      const updatedState = get().topics;
+      pendingProblemIds = (subTopicIdx === null
+        ? updatedState[topicIdx].problems
+        : updatedState[topicIdx].subtopics[subTopicIdx].problems
+      ).map((p) => p.id);
 
-    const success = await problemService.reorderProblems(updatedProblems);
-
-    if (!success) {
-      const dbTopics = await topicService.getTopics();
-      if (dbTopics.length > 0) {
-        set({ topics: dbTopics });
+      if (reorderTimer !== null) {
+        clearTimeout(reorderTimer);
       }
-    }
-  },
+
+      reorderTimer = setTimeout(async () => {
+        const idsToReorder = pendingProblemIds;
+        pendingProblemIds = [];
+
+        const success = await problemService.reorderProblems(idsToReorder);
+
+        if (!success) {
+          const dbTopics = await topicService.getTopics();
+          if (dbTopics.length > 0) {
+            set({ topics: dbTopics });
+          }
+        }
+      }, 300);
+    };
+  })(),
 }));

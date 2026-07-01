@@ -66,14 +66,63 @@ export async function updateProblem(
   if (data.title !== undefined) updateData.title = data.title;
   if (data.url !== undefined) updateData.url = data.url || null;
   if (data.difficulty !== undefined) updateData.difficulty = data.difficulty;
-  if (data.subTopicId !== undefined) updateData.subTopicId = data.subTopicId;
   if (data.notes !== undefined) updateData.notes = data.notes || null;
+
+  if (data.subTopicId === undefined) {
+    return prisma.problem.update({ where: { id }, data: updateData });
+  }
+
+  const current = await prisma.problem.findUnique({ where: { id } });
+  if (!current) {
+    throw new Error(`Problem ${id} not found`);
+  }
+
+  const containerMoved = current.subTopicId !== data.subTopicId;
+
+  if (containerMoved) {
+    const newMax = await prisma.problem.aggregate({
+      where: {
+        topicId: current.topicId,
+        subTopicId: data.subTopicId ?? null,
+      },
+      _max: { sortOrder: true },
+    });
+    updateData.subTopicId = data.subTopicId;
+    updateData.sortOrder = (newMax._max.sortOrder ?? -1) + 1;
+
+    const result = await prisma.$transaction(async (tx) => {
+      await tx.problem.updateMany({
+        where: {
+          topicId: current.topicId,
+          subTopicId: current.subTopicId,
+          sortOrder: { gt: current.sortOrder },
+        },
+        data: { sortOrder: { decrement: 1 } },
+      });
+      return tx.problem.update({ where: { id }, data: updateData });
+    });
+
+    return result;
+  }
 
   return prisma.problem.update({ where: { id }, data: updateData });
 }
 
 export async function deleteProblem(id: string): Promise<void> {
-  await prisma.problem.delete({ where: { id } });
+  const current = await prisma.problem.findUnique({ where: { id } });
+  if (!current) return;
+
+  await prisma.$transaction([
+    prisma.problem.delete({ where: { id } }),
+    prisma.problem.updateMany({
+      where: {
+        topicId: current.topicId,
+        subTopicId: current.subTopicId,
+        sortOrder: { gt: current.sortOrder },
+      },
+      data: { sortOrder: { decrement: 1 } },
+    }),
+  ]);
 }
 
 export async function updateProblemStatus(
@@ -111,10 +160,12 @@ export async function reorderProblems(
 ): Promise<void> {
   if (problemIds.length === 0) return;
 
-  const cases = problemIds.map((id, i) => `WHEN '${id}' THEN ${i}`).join(" ");
-  const ids = problemIds.map((id) => `'${id}'`).join(", ");
-
-  await prisma.$executeRawUnsafe(
-    `UPDATE "Problem" SET "sortOrder" = CAST(CASE "id" ${cases} END AS integer) WHERE "id" IN (${ids})`
+  await prisma.$transaction(
+    problemIds.map((id, index) =>
+      prisma.problem.update({
+        where: { id },
+        data: { sortOrder: index },
+      })
+    )
   );
 }
