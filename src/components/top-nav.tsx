@@ -19,7 +19,7 @@ export function TopNav() {
   const currentItem = mainNavItems.find((item) => item.href === pathname);
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+    <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b bg-background px-4">
       <SidebarTrigger className="-ml-1" />
       <Separator orientation="vertical" className="mr-2 h-4" />
       <nav className="flex items-center gap-2 text-sm text-muted-foreground">
