@@ -399,93 +399,145 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
     });
   },
 
-  updateProblemStatus: (topicId, problemId, status) => {
-    const snapshot = get().topics;
-    set((state) => {
-      const container = findProblemContainer(state.topics, topicId, problemId);
-      if (!container) return state;
+  updateProblemStatus: (() => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let pendingProblemId: string | null = null;
+    let pendingStatus: ProblemStoreItem["status"] | null = null;
+    let snapshot: TopicStoreItem[] = [];
 
-      return {
-        topics: state.topics.map((t, ti) => {
-          if (ti !== container.topicIdx) return t;
-          if (container.subTopicIdx === null) {
+    return (topicId: string, problemId: string, status: ProblemStoreItem["status"]) => {
+      if (timer === null) {
+        snapshot = get().topics;
+      }
+
+      set((state) => {
+        const container = findProblemContainer(state.topics, topicId, problemId);
+        if (!container) return state;
+
+        return {
+          topics: state.topics.map((t, ti) => {
+            if (ti !== container.topicIdx) return t;
+            if (container.subTopicIdx === null) {
+              return {
+                ...t,
+                problems: t.problems.map((p) =>
+                  p.id === problemId
+                    ? {
+                        ...p,
+                        status,
+                        ...(status === "SOLVED" ? { solvedAt: new Date().toISOString() } : {}),
+                      }
+                    : p
+                ),
+              };
+            }
             return {
               ...t,
-              problems: t.problems.map((p) =>
-                p.id === problemId
-                  ? {
-                      ...p,
-                      status,
-                      ...(status === "SOLVED" ? { solvedAt: new Date().toISOString() } : {}),
+              subtopics: t.subtopics.map((s, si) =>
+                si !== container.subTopicIdx
+                  ? s
+                  : {
+                      ...s,
+                      problems: s.problems.map((p) =>
+                        p.id === problemId
+                          ? {
+                              ...p,
+                              status,
+                              ...(status === "SOLVED" ? { solvedAt: new Date().toISOString() } : {}),
+                            }
+                          : p
+                      ),
                     }
-                  : p
               ),
             };
-          }
-          return {
-            ...t,
-            subtopics: t.subtopics.map((s, si) =>
-              si !== container.subTopicIdx
-                ? s
-                : {
-                    ...s,
-                    problems: s.problems.map((p) =>
-                      p.id === problemId
-                        ? {
-                            ...p,
-                            status,
-                            ...(status === "SOLVED" ? { solvedAt: new Date().toISOString() } : {}),
-                          }
-                        : p
-                    ),
-                  }
-            ),
-          };
-        }),
-      };
-    });
-    problemService.updateProblemStatus(problemId, status).then((result) => {
-      if (!result) set({ topics: snapshot });
-    });
-  },
+          }),
+        };
+      });
 
-  updateProblemReviewCount: (topicId, problemId, reviewCount) => {
-    const snapshot = get().topics;
-    set((state) => {
-      const container = findProblemContainer(state.topics, topicId, problemId);
-      if (!container) return state;
+      pendingProblemId = problemId;
+      pendingStatus = status;
 
-      return {
-        topics: state.topics.map((t, ti) => {
-          if (ti !== container.topicIdx) return t;
-          if (container.subTopicIdx === null) {
+      if (timer !== null) {
+        clearTimeout(timer);
+      }
+
+      timer = setTimeout(async () => {
+        const id = pendingProblemId!;
+        const st = pendingStatus!;
+        const snap = snapshot;
+        timer = null;
+        pendingProblemId = null;
+        pendingStatus = null;
+
+        const result = await problemService.updateProblemStatus(id, st);
+        if (!result) set({ topics: snap });
+      }, 300);
+    };
+  })(),
+
+  updateProblemReviewCount: (() => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let pendingProblemId: string | null = null;
+    let pendingReviewCount: number | null = null;
+    let snapshot: TopicStoreItem[] = [];
+
+    return (topicId: string, problemId: string, reviewCount: number) => {
+      if (timer === null) {
+        snapshot = get().topics;
+      }
+
+      set((state) => {
+        const container = findProblemContainer(state.topics, topicId, problemId);
+        if (!container) return state;
+
+        return {
+          topics: state.topics.map((t, ti) => {
+            if (ti !== container.topicIdx) return t;
+            if (container.subTopicIdx === null) {
+              return {
+                ...t,
+                problems: t.problems.map((p) =>
+                  p.id === problemId ? { ...p, reviewCount } : p
+                ),
+              };
+            }
             return {
               ...t,
-              problems: t.problems.map((p) =>
-                p.id === problemId ? { ...p, reviewCount } : p
+              subtopics: t.subtopics.map((s, si) =>
+                si !== container.subTopicIdx
+                  ? s
+                  : {
+                      ...s,
+                      problems: s.problems.map((p) =>
+                        p.id === problemId ? { ...p, reviewCount } : p
+                      ),
+                    }
               ),
             };
-          }
-          return {
-            ...t,
-            subtopics: t.subtopics.map((s, si) =>
-              si !== container.subTopicIdx
-                ? s
-                : {
-                    ...s,
-                    problems: s.problems.map((p) =>
-                      p.id === problemId ? { ...p, reviewCount } : p
-                    ),
-                  }
-            ),
-          };
-        }),
-      };
-    });
-    problemService.updateProblemReviewCount(problemId, reviewCount).then((result) => {
-      if (!result) set({ topics: snapshot });
-    });
-  },
+          }),
+        };
+      });
+
+      pendingProblemId = problemId;
+      pendingReviewCount = reviewCount;
+
+      if (timer !== null) {
+        clearTimeout(timer);
+      }
+
+      timer = setTimeout(async () => {
+        const id = pendingProblemId!;
+        const count = pendingReviewCount!;
+        const snap = snapshot;
+        timer = null;
+        pendingProblemId = null;
+        pendingReviewCount = null;
+
+        const result = await problemService.updateProblemReviewCount(id, count);
+        if (!result) set({ topics: snap });
+      }, 300);
+    };
+  })(),
 
   moveProblem: (() => {
     let reorderTimer: ReturnType<typeof setTimeout> | null = null;
