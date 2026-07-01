@@ -150,7 +150,7 @@ export const RecentActivitySkeleton = memo(function RecentActivitySkeleton() {
         <Skeleton className="h-3 w-44" />
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[640px] text-sm">
           <thead>
             <tr className="border-b border-border">
               <th className="px-4 py-3"><Skeleton className="h-3 w-4" /></th>
