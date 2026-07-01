@@ -133,6 +133,10 @@
     @apply font-sans;
   }
 
+  .recharts-pie-sector path {
+    transition: opacity 0.35s ease;
+  }
+
   /* browser autofill overrides */
   input:-webkit-autofill,
   input:-webkit-autofill:hover,

@@ -74,7 +74,6 @@ export function DonutChart({
                     key={entry.name}
                     fill={entry.color}
                     opacity={activeIndex === null || activeIndex === index ? 1 : 0.3}
-                    style={{ transition: "opacity 0.25s ease" }}
                   />
                 ))}
               </Pie>
