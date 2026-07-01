@@ -8,7 +8,7 @@ export default function TopicsLoading() {
       aria-busy="true"
     >
       <span className="sr-only">Loading topics...</span>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }, (_, i) => (
           <TopicCardSkeleton key={i} />
         ))}
