@@ -126,10 +126,7 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
     notes?: string;
   }) {
     if (dialog.type !== "editProblem") return;
-    updateProblem(topicId, dialog.target.id, {
-      ...input,
-      subTopicId: input.subTopicId ?? undefined,
-    });
+    updateProblem(topicId, dialog.target.id, input);
     setDialog({ type: "idle" });
     toast.success("Problem updated successfully");
   }

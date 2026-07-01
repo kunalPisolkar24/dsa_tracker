@@ -89,7 +89,7 @@ export function ProblemFormDialog({
       title: title.trim() || undefined,
       url: url.trim() || undefined,
       difficulty,
-      subTopicId: subTopicId || undefined,
+      subTopicId: isEdit ? subTopicId : (subTopicId || undefined),
       notes: notes.trim() || undefined,
     });
     if (!result.success) {
