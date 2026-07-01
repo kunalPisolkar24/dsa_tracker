@@ -114,7 +114,7 @@ export function TopicsPageClient() {
       <div className="flex-1">
         {!hydrated && (
           <div
-            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+            className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
             role="status"
             aria-busy="true"
           >
@@ -160,7 +160,7 @@ export function TopicsPageClient() {
 
         {hydrated && hasFilteredResults && (
           <>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {paginatedTopics.map((topic) => (
                 <TopicCard
                   key={topic.id}
