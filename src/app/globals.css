@@ -24,6 +24,9 @@
   --color-chart-1: var(--chart-1);
   --color-chart-solved: var(--chart-solved);
   --color-chart-review: var(--chart-review);
+  --color-chart-easy: var(--chart-easy);
+  --color-chart-medium: var(--chart-medium);
+  --color-chart-hard: var(--chart-hard);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -75,6 +78,9 @@
   --chart-5: oklch(0.424 0.199 265.638);
   --chart-solved: oklch(0.696 0.17 148.02);
   --chart-review: oklch(0.606 0.25 292.72);
+  --chart-easy: oklch(0.69 0.18 155);
+  --chart-medium: oklch(0.72 0.19 85);
+  --chart-hard: oklch(0.55 0.23 25);
   --radius: 0.45rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
@@ -112,6 +118,9 @@
   --chart-5: oklch(0.424 0.199 265.638);
   --chart-solved: oklch(0.765 0.177 163.223);
   --chart-review: oklch(0.702 0.183 293.541);
+  --chart-easy: oklch(0.76 0.17 160);
+  --chart-medium: oklch(0.78 0.17 80);
+  --chart-hard: oklch(0.68 0.20 22);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.623 0.214 259.815);
@@ -134,7 +143,7 @@
   }
 
   .recharts-pie-sector path {
-    transition: opacity 0.55s ease;
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   /* browser autofill overrides */

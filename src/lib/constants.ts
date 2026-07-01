@@ -61,9 +61,9 @@ export const LAYOUT = {
 } as const;
 
 export const CHART_COLORS = {
-  EASY: "var(--chart-2)",
-  MEDIUM: "var(--chart-3)",
-  HARD: "var(--chart-1)",
+  EASY: "var(--chart-easy)",
+  MEDIUM: "var(--chart-medium)",
+  HARD: "var(--chart-hard)",
   SOLVED: "var(--chart-solved)",
   MARKED_FOR_REVIEW: "var(--chart-review)",
   GRID_STROKE: "var(--border)",
