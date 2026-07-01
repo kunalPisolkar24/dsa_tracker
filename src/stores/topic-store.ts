@@ -482,14 +482,13 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
   },
 
   moveProblem: async (topicId, problemId, direction) => {
-    const snapshot = get().topics;
-    const container = findProblemContainer(snapshot, topicId, problemId);
+    const container = findProblemContainer(get().topics, topicId, problemId);
     if (!container) return;
     const { topicIdx, subTopicIdx, problemIdx } = container;
 
     const problems = subTopicIdx === null
-      ? snapshot[topicIdx].problems
-      : snapshot[topicIdx].subtopics[subTopicIdx].problems;
+      ? get().topics[topicIdx].problems
+      : get().topics[topicIdx].subtopics[subTopicIdx].problems;
 
     const targetIdx = direction === "up" ? problemIdx - 1 : problemIdx + 1;
     if (targetIdx < 0 || targetIdx >= problems.length) return;
@@ -517,13 +516,16 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
       }),
     }));
 
-    const [res1, res2] = await Promise.all([
-      problemService.reorderProblem(problemId, targetProblem.sortOrder),
-      problemService.reorderProblem(targetProblem.id, movingProblem.sortOrder),
+    const success = await problemService.reorderProblems([
+      { id: problemId, sortOrder: targetProblem.sortOrder },
+      { id: targetProblem.id, sortOrder: movingProblem.sortOrder },
     ]);
 
-    if (!res1 || !res2) {
-      set({ topics: snapshot });
+    if (!success) {
+      const dbTopics = await topicService.getTopics();
+      if (dbTopics.length > 0) {
+        set({ topics: dbTopics });
+      }
     }
   },
 }));

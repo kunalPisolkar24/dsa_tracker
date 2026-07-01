@@ -105,3 +105,16 @@ export async function updateProblemSortOrder(
     data: { sortOrder },
   });
 }
+
+export async function updateProblemSortOrders(
+  updates: { id: string; sortOrder: number }[]
+): Promise<void> {
+  await prisma.$transaction(
+    updates.map((u) =>
+      prisma.problem.update({
+        where: { id: u.id },
+        data: { sortOrder: u.sortOrder },
+      })
+    )
+  );
+}

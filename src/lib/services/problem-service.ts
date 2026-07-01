@@ -147,6 +147,21 @@ export async function reorderProblem(
   }
 }
 
+export async function reorderProblems(
+  updates: { id: string; sortOrder: number }[]
+): Promise<boolean> {
+  try {
+    await problemRepo.updateProblemSortOrders(updates);
+    return true;
+  } catch (error) {
+    logger.error("Failed to reorder problems", {
+      updates,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return false;
+  }
+}
+
 export async function updateProblemReviewCount(
   problemId: string,
   reviewCount: number
