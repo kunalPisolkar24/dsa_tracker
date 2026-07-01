@@ -5,7 +5,7 @@ export const StatsCardsSkeleton = memo(function StatsCardsSkeleton() {
   return (
     <div
       data-slot="card"
-      className="group/card flex flex-col gap-4 overflow-hidden rounded-xl bg-card p-4 text-sm text-card-foreground ring-1 ring-foreground/10 col-span-1 sm:col-span-2 md:col-span-2"
+      className="group/card flex flex-col gap-4 overflow-hidden rounded-xl bg-card p-4 text-sm text-card-foreground ring-1 ring-foreground/10 col-span-1 md:col-span-2"
       aria-hidden="true"
     >
       <div className="flex items-center gap-2 pb-2">
@@ -185,11 +185,11 @@ export const DashboardShellSkeleton = memo(function DashboardShellSkeleton() {
       aria-busy="true"
     >
       <span className="sr-only">Loading dashboard...</span>
-      <div className="grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 md:grid-cols-3">
+      <div className="grid grid-cols-1 items-stretch gap-6 md:grid-cols-2 lg:grid-cols-3">
         <StatsCardsSkeleton />
         <DonutChartSkeleton />
       </div>
-      <div className="grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-2">
+      <div className="grid grid-cols-1 items-stretch gap-6 md:grid-cols-2">
         <TopicRadarSkeleton />
         <ReviewRadialSkeleton />
       </div>
