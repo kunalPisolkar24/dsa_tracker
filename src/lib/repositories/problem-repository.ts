@@ -106,15 +106,15 @@ export async function updateProblemSortOrder(
   });
 }
 
-export async function updateProblemSortOrders(
-  updates: { id: string; sortOrder: number }[]
+export async function reorderProblems(
+  problemIds: string[]
 ): Promise<void> {
-  await prisma.$transaction(
-    updates.map((u) =>
-      prisma.problem.update({
-        where: { id: u.id },
-        data: { sortOrder: u.sortOrder },
-      })
-    )
+  if (problemIds.length === 0) return;
+
+  const cases = problemIds.map((id, i) => `WHEN '${id}' THEN ${i}`).join(" ");
+  const ids = problemIds.map((id) => `'${id}'`).join(", ");
+
+  await prisma.$executeRawUnsafe(
+    `UPDATE "Problem" SET "sortOrder" = CAST(CASE "id" ${cases} END AS integer) WHERE "id" IN (${ids})`
   );
 }

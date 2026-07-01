@@ -148,14 +148,14 @@ export async function reorderProblem(
 }
 
 export async function reorderProblems(
-  updates: { id: string; sortOrder: number }[]
+  problemIds: string[]
 ): Promise<boolean> {
   try {
-    await problemRepo.updateProblemSortOrders(updates);
+    await problemRepo.reorderProblems(problemIds);
     return true;
   } catch (error) {
     logger.error("Failed to reorder problems", {
-      updates,
+      problemIds,
       error: error instanceof Error ? error.message : String(error),
     });
     return false;

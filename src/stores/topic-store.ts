@@ -516,10 +516,13 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
       }),
     }));
 
-    const success = await problemService.reorderProblems([
-      { id: problemId, sortOrder: targetProblem.sortOrder },
-      { id: targetProblem.id, sortOrder: movingProblem.sortOrder },
-    ]);
+    const updatedState = get().topics;
+    const updatedProblems = (subTopicIdx === null
+      ? updatedState[topicIdx].problems
+      : updatedState[topicIdx].subtopics[subTopicIdx].problems
+    ).map((p) => p.id);
+
+    const success = await problemService.reorderProblems(updatedProblems);
 
     if (!success) {
       const dbTopics = await topicService.getTopics();
