@@ -26,7 +26,7 @@ export function RecentActivity({ data }: RecentActivityProps) {
       </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[640px] text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs uppercase text-muted-foreground">
                 <th className="px-4 py-3 font-medium">#</th>
