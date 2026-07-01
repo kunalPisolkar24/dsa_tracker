@@ -22,7 +22,7 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
     <SidebarProvider>
       <StoreHydrator />
       <AppSidebar user={user} navItems={mainNavItems} />
-      <main className="flex min-h-svh flex-1 flex-col">
+      <main className="flex min-h-dvh flex-1 flex-col">
         <TopNav />
         {children}
       </main>
