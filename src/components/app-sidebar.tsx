@@ -28,6 +28,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTheme } from "next-themes";
 import { useUIStore } from "@/stores/ui-store";
+import { useIsMobile } from "@/hooks/use-mobile";
 import type { NavItem } from "@/lib/navigation";
 
 interface AppSidebarUser {
@@ -55,6 +56,7 @@ export function AppSidebar({ user, navItems }: AppSidebarProps) {
   const setActiveNav = useUIStore((s) => s.setActiveNav);
   const { resolvedTheme, setTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
+  const isMobile = useIsMobile();
 
   return (
     <Sidebar collapsible="icon">
@@ -118,7 +120,7 @@ export function AppSidebar({ user, navItems }: AppSidebarProps) {
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
-                side="right"
+                side={isMobile ? "top" : "right"}
                 align="end"
                 className="w-56"
               >
