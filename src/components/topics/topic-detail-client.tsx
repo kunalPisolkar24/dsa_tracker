@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Plus, ArrowLeft } from "lucide-react";
+import { Plus, Pencil, Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
@@ -11,16 +11,23 @@ import { useTopicStore } from "@/stores/topic-store";
 import {
   computeTopicCardViewModel,
   computeSubtopicViewModel,
+  computeBatchChanges,
+  updateProblemInDraft,
 } from "@/lib/topic-utils";
 import type {
   SubTopicStoreItem,
   ProblemStoreItem,
 } from "@/types/topics";
+import type { TopicStoreItem } from "@/types/topics";
+import * as topicService from "@/lib/services/topic-service";
+import * as subTopicService from "@/lib/services/subtopic-service";
+import * as problemService from "@/lib/services/problem-service";
 import { SubtopicSection } from "@/components/topics/subtopic-section";
 import { ProblemRow } from "@/components/topics/problem-row";
 import { SubtopicFormDialog } from "@/components/topics/subtopic-form-dialog";
 import { ProblemFormDialog } from "@/components/topics/problem-form-dialog";
 import { DeleteConfirmationDialog } from "@/components/topics/delete-confirmation-dialog";
+import { UnsavedChangesDialog } from "@/components/topics/unsaved-changes-dialog";
 import { TopicDetailSkeleton } from "@/components/topics/topic-skeleton";
 
 interface TopicsDetailClientProps {
@@ -48,19 +55,27 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
     updateProblemStatus,
     updateProblemReviewCount,
     moveProblem,
+    replaceTopic,
   } = useTopicStore();
 
   const [dialog, setDialog] = useState<DialogState>({ type: "idle" });
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState<TopicStoreItem | null>(null);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+
+  const displayTopic = isEditing && draft ? draft : topic;
 
   const topicViewModel = useMemo(
-    () => (topic ? computeTopicCardViewModel(topic) : null),
-    [topic]
+    () => (displayTopic ? computeTopicCardViewModel(displayTopic) : null),
+    [displayTopic]
   );
 
-  const directProblems = topic?.problems ?? [];
+  const displayDirectProblems = displayTopic?.problems ?? [];
   const subtopicViewModels = useMemo(
-    () => topic?.subtopics.map(computeSubtopicViewModel) ?? [],
-    [topic?.subtopics]
+    () => displayTopic?.subtopics.map(computeSubtopicViewModel) ?? [],
+    [displayTopic?.subtopics]
   );
 
   if (!hydrated) {
@@ -90,6 +105,10 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
 
   async function handleEditSubTopic(input: { name: string; description?: string }): Promise<boolean> {
     if (dialog.type !== "editSubTopic") return false;
+    if (isEditing) {
+      handleDraftSubTopicEdit(dialog.target.id, input);
+      return true;
+    }
     updateSubTopic(topicId, dialog.target.id, input);
     toast.success("Sub-topic updated successfully");
     return true;
@@ -97,6 +116,18 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
 
   function handleDeleteSubTopic() {
     if (dialog.type !== "delete" || dialog.entityType !== "subtopic") return;
+    if (isEditing) {
+      setDraft((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          subtopics: prev.subtopics.filter((st) => st.id !== dialog.target.id),
+        };
+      });
+      setHasChanges(true);
+      setDialog({ type: "idle" });
+      return;
+    }
     removeSubTopic(topicId, dialog.target.id);
     setDialog({ type: "idle" });
     toast.success("Sub-topic deleted successfully");
@@ -123,6 +154,10 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
     notes?: string;
   }): Promise<boolean> {
     if (dialog.type !== "editProblem") return false;
+    if (isEditing) {
+      handleDraftProblemEdit(dialog.target.id, input);
+      return true;
+    }
     updateProblem(topicId, dialog.target.id, input);
     toast.success("Problem updated successfully");
     return true;
@@ -130,6 +165,24 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
 
   function handleDeleteProblem() {
     if (dialog.type !== "delete" || dialog.entityType !== "problem") return;
+    if (isEditing) {
+      setDraft((prev) => {
+        if (!prev) return prev;
+        const removeFromList = (problems: ProblemStoreItem[]) =>
+          problems.filter((p) => p.id !== dialog.target.id);
+        return {
+          ...prev,
+          problems: removeFromList(prev.problems),
+          subtopics: prev.subtopics.map((st) => ({
+            ...st,
+            problems: removeFromList(st.problems),
+          })),
+        };
+      });
+      setHasChanges(true);
+      setDialog({ type: "idle" });
+      return;
+    }
     removeProblem(topicId, dialog.target.id);
     setDialog({ type: "idle" });
     toast.success("Problem deleted successfully");
@@ -140,22 +193,210 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
     status: ProblemStoreItem["status"]
   ) {
     updateProblemStatus(topicId, problemId, status);
+    if (isEditing && draft) {
+      setDraft((prev) => {
+        if (!prev) return prev;
+        return updateProblemInDraft(prev, problemId, { status });
+      });
+    }
   }
 
   function handleProblemReviewCountChange(problemId: string, count: number) {
     updateProblemReviewCount(topicId, problemId, count);
+    if (isEditing && draft) {
+      setDraft((prev) => {
+        if (!prev) return prev;
+        return updateProblemInDraft(prev, problemId, { reviewCount: count });
+      });
+    }
   }
 
   function handleProblemMoveUp(problemId: string) {
+    if (isEditing) {
+      moveProblemInDraft(problemId, "up");
+      return;
+    }
     moveProblem(topicId, problemId, "up");
   }
 
   function handleProblemMoveDown(problemId: string) {
+    if (isEditing) {
+      moveProblemInDraft(problemId, "down");
+      return;
+    }
     moveProblem(topicId, problemId, "down");
   }
 
-  const hasSubtopics = topic.subtopics.length > 0;
-  const hasDirectProblems = directProblems.length > 0;
+  function handleEnterEditMode() {
+    if (!topic) return;
+    setDraft(structuredClone(topic));
+    setHasChanges(false);
+    setIsEditing(true);
+  }
+
+  function handleCancelEdit() {
+    if (hasChanges) {
+      setShowUnsavedDialog(true);
+    } else {
+      setIsEditing(false);
+      setDraft(null);
+    }
+  }
+
+  function handleDiscardChanges() {
+    setShowUnsavedDialog(false);
+    setIsEditing(false);
+    setDraft(null);
+    setHasChanges(false);
+  }
+
+  async function handleSave() {
+    if (!topic || !draft) return;
+
+    const changes = computeBatchChanges(topic, draft);
+    if (!changes.hasAny) {
+      setIsEditing(false);
+      setDraft(null);
+      setHasChanges(false);
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const operations: Promise<unknown>[] = [];
+
+      for (const st of changes.subtopicUpdates) {
+        operations.push(subTopicService.updateSubTopic(st.id, st.input));
+      }
+      for (const id of changes.subtopicDeletes) {
+        operations.push(subTopicService.deleteSubTopic(id));
+      }
+      for (const p of changes.problemUpdates) {
+        operations.push(problemService.updateProblem(p.id, p.input));
+      }
+      for (const id of changes.problemDeletes) {
+        operations.push(problemService.deleteProblem(id));
+      }
+      for (const ids of changes.problemReorders) {
+        operations.push(problemService.reorderProblems(ids));
+      }
+
+      const results = await Promise.allSettled(operations);
+      const allOk = results.every(
+        (r) => r.status === "fulfilled" && r.value !== null && r.value !== false
+      );
+
+      const dbTopics = await topicService.getTopics();
+      const updatedTopic = dbTopics.find((t: TopicStoreItem) => t.id === topicId);
+      if (updatedTopic) {
+        replaceTopic(topicId, updatedTopic);
+      }
+
+      if (allOk) {
+        setIsEditing(false);
+        setDraft(null);
+        setHasChanges(false);
+        toast.success("Changes saved successfully");
+      } else {
+        toast.error("Some changes failed to save");
+      }
+    } catch {
+      const dbTopics = await topicService.getTopics();
+      const updatedTopic = dbTopics.find((t: TopicStoreItem) => t.id === topicId);
+      if (updatedTopic) {
+        replaceTopic(topicId, updatedTopic);
+      }
+      toast.error("Failed to save changes");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  function moveProblemInDraft(problemId: string, direction: "up" | "down") {
+    setDraft((prev) => {
+      if (!prev) return prev;
+      const moveInList = (problems: ProblemStoreItem[]) => {
+        const idx = problems.findIndex((p) => p.id === problemId);
+        if (idx === -1) return problems;
+        const targetIdx = direction === "up" ? idx - 1 : idx + 1;
+        if (targetIdx < 0 || targetIdx >= problems.length) return problems;
+        const copy = [...problems];
+        [copy[idx], copy[targetIdx]] = [copy[targetIdx], copy[idx]];
+        return copy;
+      };
+      const directMoved = moveInList(prev.problems);
+      if (directMoved !== prev.problems) {
+        return { ...prev, problems: directMoved };
+      }
+      for (let i = 0; i < prev.subtopics.length; i++) {
+        const moved = moveInList(prev.subtopics[i].problems);
+        if (moved !== prev.subtopics[i].problems) {
+          const subtopics = prev.subtopics.map((st, si) =>
+            si === i ? { ...st, problems: moved } : st
+          );
+          return { ...prev, subtopics };
+        }
+      }
+      return prev;
+    });
+    setHasChanges(true);
+  }
+
+  function handleDraftSubTopicEdit(
+    subtopicId: string,
+    input: { name: string; description?: string }
+  ) {
+    setDraft((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        subtopics: prev.subtopics.map((st) =>
+          st.id === subtopicId ? { ...st, ...input } : st
+        ),
+      };
+    });
+    setHasChanges(true);
+  }
+
+  function handleDraftProblemEdit(
+    problemId: string,
+    input: {
+      title: string;
+      url?: string;
+      difficulty: "EASY" | "MEDIUM" | "HARD";
+      subTopicId?: string | null;
+      notes?: string;
+    }
+  ) {
+    setDraft((prev) => {
+      if (!prev) return prev;
+      const updateInList = (problems: ProblemStoreItem[]) =>
+        problems.map((p) =>
+          p.id === problemId
+            ? {
+                ...p,
+                title: input.title,
+                url: input.url,
+                difficulty: input.difficulty,
+                subTopicId: input.subTopicId ?? null,
+                notes: input.notes,
+              }
+            : p
+        );
+      return {
+        ...prev,
+        problems: updateInList(prev.problems),
+        subtopics: prev.subtopics.map((st) => ({
+          ...st,
+          problems: updateInList(st.problems),
+        })),
+      };
+    });
+    setHasChanges(true);
+  }
+
+  const hasSubtopics = (displayTopic?.subtopics.length ?? 0) > 0;
+  const hasDirectProblems = (displayDirectProblems?.length ?? 0) > 0;
   const hasAnyContent = hasSubtopics || hasDirectProblems;
 
   return (
@@ -179,10 +420,11 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
         <Progress value={topicViewModel.progressPercent} />
       </div>
 
-      <div className="mb-6 flex gap-2">
+      <div className="mb-6 flex flex-wrap gap-2">
         <Button
           size="sm"
           variant="outline"
+          disabled={isEditing}
           onClick={() => setDialog({ type: "createSubTopic" })}
         >
           <Plus />
@@ -191,18 +433,51 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
         <Button
           size="sm"
           variant="outline"
+          disabled={isEditing}
           onClick={() => setDialog({ type: "createProblem" })}
         >
           <Plus />
           Add Problem
         </Button>
+        <div className="ml-auto flex gap-2">
+          {isEditing ? (
+            <>
+              <Button
+                size="sm"
+                variant="default"
+                disabled={isSaving || !hasChanges}
+                onClick={handleSave}
+              >
+                {isSaving && <Loader2 className="size-3 animate-spin" />}
+                {isSaving ? "Saving..." : "Save"}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={isSaving}
+                onClick={handleCancelEdit}
+              >
+                Cancel
+              </Button>
+            </>
+          ) : (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleEnterEditMode}
+            >
+              <Pencil className="size-3" />
+              Edit
+            </Button>
+          )}
+        </div>
       </div>
 
       <Separator className="mb-6" />
 
       <div className="flex-1 space-y-8">
         {hasSubtopics &&
-          topic.subtopics.map((subtopic) => {
+          displayTopic!.subtopics.map((subtopic) => {
             const vm = subtopicViewModels.find((v) => v.id === subtopic.id);
             if (!vm) return null;
             return (
@@ -210,6 +485,7 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
                 key={subtopic.id}
                 subtopic={subtopic}
                 viewModel={vm}
+                isEditing={isEditing}
                 onEdit={(st) => setDialog({ type: "editSubTopic", target: st })}
                 onDelete={(st) =>
                   setDialog({
@@ -240,12 +516,13 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
           <div className="overflow-x-auto">
             <div className="flex w-max min-w-full flex-col gap-3">
             <h2 className="text-base font-medium">Direct Problems</h2>
-            {directProblems.map((problem, idx) => (
+            {displayDirectProblems.map((problem, idx) => (
               <ProblemRow
                 key={problem.id}
                 problem={problem}
+                isEditing={isEditing}
                 isFirst={idx === 0}
-                isLast={idx === directProblems.length - 1}
+                isLast={idx === displayDirectProblems.length - 1}
                 onStatusChange={handleProblemStatusChange}
                 onReviewCountChange={handleProblemReviewCountChange}
                 onMoveUp={handleProblemMoveUp}
@@ -276,6 +553,7 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
               <Button
                 variant="outline"
                 size="sm"
+                disabled={isEditing}
                 onClick={() => setDialog({ type: "createSubTopic" })}
               >
                 <Plus />
@@ -284,6 +562,7 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
               <Button
                 variant="outline"
                 size="sm"
+                disabled={isEditing}
                 onClick={() => setDialog({ type: "createProblem" })}
               >
                 <Plus />
@@ -332,7 +611,7 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
             ? handleEditProblem
             : handleCreateProblem
         }
-        subtopics={topic.subtopics}
+        subtopics={displayTopic?.subtopics ?? []}
         initialValues={
           dialog.type === "editProblem"
             ? {
@@ -376,6 +655,14 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
               : handleDeleteProblem
             : () => {}
         }
+      />
+
+      <UnsavedChangesDialog
+        open={showUnsavedDialog}
+        onOpenChange={(open) => {
+          if (!open) setShowUnsavedDialog(false);
+        }}
+        onDiscard={handleDiscardChanges}
       />
     </div>
   );
