@@ -84,16 +84,15 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
     );
   }
 
-  function handleCreateSubTopic(input: { name: string; description?: string }) {
-    addSubTopic(topicId, input);
-    toast.success("Sub-topic created successfully");
+  async function handleCreateSubTopic(input: { name: string; description?: string }): Promise<boolean> {
+    return addSubTopic(topicId, input);
   }
 
-  function handleEditSubTopic(input: { name: string; description?: string }) {
-    if (dialog.type !== "editSubTopic") return;
+  async function handleEditSubTopic(input: { name: string; description?: string }): Promise<boolean> {
+    if (dialog.type !== "editSubTopic") return false;
     updateSubTopic(topicId, dialog.target.id, input);
-    setDialog({ type: "idle" });
     toast.success("Sub-topic updated successfully");
+    return true;
   }
 
   function handleDeleteSubTopic() {
@@ -103,31 +102,30 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
     toast.success("Sub-topic deleted successfully");
   }
 
-  function handleCreateProblem(input: {
+  async function handleCreateProblem(input: {
     title: string;
     url?: string;
     difficulty: "EASY" | "MEDIUM" | "HARD";
     subTopicId?: string | null;
     notes?: string;
-  }) {
-    addProblem(topicId, {
+  }): Promise<boolean> {
+    return addProblem(topicId, {
       ...input,
       subTopicId: input.subTopicId ?? undefined,
     });
-    toast.success("Problem created successfully");
   }
 
-  function handleEditProblem(input: {
+  async function handleEditProblem(input: {
     title: string;
     url?: string;
     difficulty: "EASY" | "MEDIUM" | "HARD";
     subTopicId?: string | null;
     notes?: string;
-  }) {
-    if (dialog.type !== "editProblem") return;
+  }): Promise<boolean> {
+    if (dialog.type !== "editProblem") return false;
     updateProblem(topicId, dialog.target.id, input);
-    setDialog({ type: "idle" });
     toast.success("Problem updated successfully");
+    return true;
   }
 
   function handleDeleteProblem() {

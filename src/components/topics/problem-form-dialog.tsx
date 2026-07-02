@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { z } from "zod";
 import { createProblemSchema, updateProblemSchema } from "@/lib/schemas";
 import type { SubTopicStoreItem } from "@/types/topics";
@@ -43,7 +44,7 @@ interface ProblemFormDialogProps {
     difficulty: "EASY" | "MEDIUM" | "HARD";
     subTopicId?: string | null;
     notes?: string;
-  }) => void;
+  }) => Promise<boolean>;
   subtopics: SubTopicStoreItem[];
   initialValues?: {
     title: string;
@@ -82,7 +83,7 @@ export function ProblemFormDialog({
 
   const isEdit = mode === "edit";
 
-  function handleSubmit() {
+  async function handleSubmit() {
     setErrors({});
     const schema = isEdit ? updateProblemSchema : createProblemFormSchema;
     const result = schema.safeParse({
@@ -104,21 +105,38 @@ export function ProblemFormDialog({
     }
     setIsSubmitting(true);
     try {
-      onSubmit({
-        title: title.trim(),
-        url: url.trim() || undefined,
-        difficulty,
-        subTopicId: subTopicId || null,
-        notes: notes.trim() || undefined,
-      });
-      if (!isEdit) {
-        setTitle("");
-        setUrl("");
-        setDifficulty("EASY");
-        setSubTopicId(null);
-        setNotes("");
+      if (isEdit) {
+        onSubmit({
+          title: title.trim(),
+          url: url.trim() || undefined,
+          difficulty,
+          subTopicId: subTopicId || null,
+          notes: notes.trim() || undefined,
+        });
+        onOpenChange(false);
+      } else {
+        const success = await onSubmit({
+          title: title.trim(),
+          url: url.trim() || undefined,
+          difficulty,
+          subTopicId: subTopicId || null,
+          notes: notes.trim() || undefined,
+        });
+        if (success) {
+          setTitle("");
+          setUrl("");
+          setDifficulty("EASY");
+          setSubTopicId(null);
+          setNotes("");
+          onOpenChange(false);
+        } else {
+          toast.error("Failed to create problem");
+        }
       }
-      onOpenChange(false);
+    } catch {
+      if (!isEdit) {
+        toast.error("An unexpected error occurred");
+      }
     } finally {
       setIsSubmitting(false);
     }

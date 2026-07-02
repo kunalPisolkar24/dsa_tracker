@@ -62,16 +62,15 @@ export function TopicsPageClient() {
     LAYOUT.PAGE_SIZE
   );
 
-  function handleCreate(input: CreateTopicInput) {
-    addTopic(input);
-    toast.success("Topic created successfully");
+  async function handleCreate(input: CreateTopicInput): Promise<boolean> {
+    return addTopic(input);
   }
 
-  function handleEdit(input: CreateTopicInput) {
-    if (!editTarget) return;
+  async function handleEdit(input: CreateTopicInput): Promise<boolean> {
+    if (!editTarget) return false;
     updateTopic(editTarget.id, input);
-    setEditTarget(null);
     toast.success("Topic updated successfully");
+    return true;
   }
 
   function handleDelete() {

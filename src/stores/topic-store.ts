@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import type { TopicStoreItem, SubTopicStoreItem, ProblemStoreItem } from "@/types/topics";
+import type { TopicStoreItem, ProblemStoreItem } from "@/types/topics";
 import type {
   CreateTopicInput,
   UpdateTopicInput,
@@ -32,13 +32,13 @@ interface TopicStoreState {
 
 interface TopicStoreActions {
   hydrate: () => Promise<void>;
-  addTopic: (input: CreateTopicInput) => TopicStoreItem;
+  addTopic: (input: CreateTopicInput) => Promise<boolean>;
   updateTopic: (id: string, input: UpdateTopicInput) => void;
   removeTopic: (id: string) => void;
-  addSubTopic: (topicId: string, input: Omit<CreateSubTopicInput, "topicId">) => SubTopicStoreItem;
+  addSubTopic: (topicId: string, input: Omit<CreateSubTopicInput, "topicId">) => Promise<boolean>;
   updateSubTopic: (topicId: string, subTopicId: string, input: UpdateSubTopicInput) => void;
   removeSubTopic: (topicId: string, subTopicId: string) => void;
-  addProblem: (topicId: string, input: Omit<CreateProblemInput, "topicId">) => ProblemStoreItem;
+  addProblem: (topicId: string, input: Omit<CreateProblemInput, "topicId">) => Promise<boolean>;
   updateProblem: (topicId: string, problemId: string, input: UpdateProblemInput) => void;
   removeProblem: (topicId: string, problemId: string) => void;
   updateProblemStatus: (topicId: string, problemId: string, status: ProblemStoreItem["status"]) => void;
@@ -89,20 +89,24 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
     }
   },
 
-  addTopic: (input) => {
+  addTopic: async (input) => {
     const snapshot = get().topics;
     const newTopic = createTopicService(input);
     set((state) => ({ topics: [...state.topics, newTopic] }));
-    topicService.createTopic(input).then((dbTopic) => {
+    try {
+      const dbTopic = await topicService.createTopic(input);
       if (dbTopic) {
         set((state) => ({
           topics: state.topics.map((t) => (t.id === newTopic.id ? dbTopic : t)),
         }));
-      } else {
-        set({ topics: snapshot });
+        return true;
       }
-    });
-    return newTopic;
+      set({ topics: snapshot });
+      return false;
+    } catch {
+      set({ topics: snapshot });
+      return false;
+    }
   },
 
   updateTopic: (id, input) => {
@@ -127,7 +131,7 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
     });
   },
 
-  addSubTopic: (topicId, input) => {
+  addSubTopic: async (topicId, input) => {
     const snapshot = get().topics;
     const newSubTopic = createSubTopicService({ ...input, topicId });
     set((state) => ({
@@ -137,7 +141,8 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
           : t
       ),
     }));
-    subTopicService.createSubTopic(topicId, input).then((dbSubTopic) => {
+    try {
+      const dbSubTopic = await subTopicService.createSubTopic(topicId, input);
       if (dbSubTopic) {
         set((state) => ({
           topics: state.topics.map((t) =>
@@ -151,11 +156,14 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
               : t
           ),
         }));
-      } else {
-        set({ topics: snapshot });
+        return true;
       }
-    });
-    return newSubTopic;
+      set({ topics: snapshot });
+      return false;
+    } catch {
+      set({ topics: snapshot });
+      return false;
+    }
   },
 
   updateSubTopic: (topicId, subTopicId, input) => {
@@ -191,7 +199,7 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
     });
   },
 
-  addProblem: (topicId, input) => {
+  addProblem: async (topicId, input) => {
     const snapshot = get().topics;
     const topic = get().topics.find((t) => t.id === topicId);
     const existingProblems = topic
@@ -216,7 +224,8 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
         return { ...t, problems: [...t.problems, newProblem] };
       }),
     }));
-    problemService.createProblem(topicId, input).then((dbProblem) => {
+    try {
+      const dbProblem = await problemService.createProblem(topicId, input);
       if (dbProblem) {
         set((state) => ({
           topics: state.topics.map((t) => {
@@ -236,11 +245,14 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
             return { ...t, problems: updateProblemInList(t.problems) };
           }),
         }));
-      } else {
-        set({ topics: snapshot });
+        return true;
       }
-    });
-    return newProblem;
+      set({ topics: snapshot });
+      return false;
+    } catch {
+      set({ topics: snapshot });
+      return false;
+    }
   },
 
   updateProblem: (topicId, problemId, input) => {
