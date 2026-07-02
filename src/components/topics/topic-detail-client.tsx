@@ -239,7 +239,7 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
           })}
 
         {hasDirectProblems && (
-          <div className="space-y-3">
+          <div className="overflow-x-auto space-y-3">
             <h2 className="text-base font-medium">Direct Problems</h2>
             {directProblems.map((problem, idx) => (
               <ProblemRow

@@ -107,7 +107,7 @@ export function SubtopicSection({
         </div>
 
         <CollapsibleContent>
-          <div className="pt-3 pl-6">
+          <div className="overflow-x-auto pt-3 pl-6">
             {hasProblems ? (
               <div className="space-y-2">
                 {subtopic.problems.map((problem, idx) => (

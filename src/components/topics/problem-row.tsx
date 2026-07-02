@@ -63,19 +63,19 @@ export function ProblemRow({
         </Button>
       </div>
 
-      <div className="flex min-w-0 flex-1 items-center gap-2">
+      <div className="flex flex-1 items-center gap-2 overflow-hidden">
         {problem.url ? (
           <a
             href={problem.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="truncate font-medium underline-offset-2 hover:underline"
+            className="whitespace-nowrap font-medium underline-offset-2 hover:underline"
           >
             {problem.title}
             <ExternalLink className="ml-1 inline size-3 text-muted-foreground" />
           </a>
         ) : (
-          <span className="truncate font-medium">{problem.title}</span>
+          <span className="whitespace-nowrap font-medium">{problem.title}</span>
         )}
       </div>
 
