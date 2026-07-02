@@ -63,7 +63,7 @@ export function ProblemRow({
         </Button>
       </div>
 
-      <div className="flex flex-1 items-center gap-2 overflow-hidden">
+      <div className="flex flex-1 items-center gap-2">
         {problem.url ? (
           <a
             href={problem.url}

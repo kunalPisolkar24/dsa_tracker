@@ -109,7 +109,7 @@ export function SubtopicSection({
         <CollapsibleContent>
           <div className="overflow-x-auto pt-3 pl-6">
             {hasProblems ? (
-              <div className="space-y-2">
+              <div className="flex w-max min-w-full flex-col gap-2">
                 {subtopic.problems.map((problem, idx) => (
                   <ProblemRow
                     key={problem.id}

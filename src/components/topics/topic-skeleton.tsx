@@ -79,10 +79,12 @@ export const SubtopicSectionSkeleton = memo(function SubtopicSectionSkeleton() {
         </div>
         <Skeleton className="h-2 w-full rounded-full" />
       </div>
-      <div className="space-y-2 pl-6">
-        <ProblemRowSkeleton />
-        <ProblemRowSkeleton />
-        <ProblemRowSkeleton />
+      <div className="overflow-x-auto pl-6">
+        <div className="flex w-max min-w-full flex-col gap-2">
+          <ProblemRowSkeleton />
+          <ProblemRowSkeleton />
+          <ProblemRowSkeleton />
+        </div>
       </div>
     </div>
   );
