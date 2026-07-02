@@ -12,7 +12,6 @@ import {
   computeTopicCardViewModel,
   computeSubtopicViewModel,
 } from "@/lib/topic-utils";
-import { LAYOUT } from "@/lib/constants";
 import type {
   SubTopicStoreItem,
   ProblemStoreItem,
@@ -70,7 +69,7 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
 
   if (!topic || !topicViewModel) {
     return (
-      <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center gap-4 px-4 py-24 text-center">
+      <div className="mx-auto flex w-full flex-1 flex-col items-center justify-center gap-4 px-4 py-24 text-center">
         <p className="text-lg font-medium">Topic not found</p>
         <p className="text-sm text-muted-foreground">
           The topic you are looking for does not exist.
@@ -162,7 +161,7 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
   const hasAnyContent = hasSubtopics || hasDirectProblems;
 
   return (
-    <div className={`mx-auto flex w-full ${LAYOUT.DETAIL_MAX_WIDTH} flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8`}>
+    <div className="mx-auto flex w-full flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-2">
         <h1 className="text-2xl font-bold tracking-tight">{topic.name}</h1>
         {topic.description && (

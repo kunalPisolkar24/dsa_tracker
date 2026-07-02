@@ -89,7 +89,7 @@ export function TopicsPageClient() {
   const hasFilteredResults = paginatedTopics.length > 0;
 
   return (
-    <div className={`mx-auto flex w-full ${LAYOUT.MAX_WIDTH} flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8`}>
+    <div className="mx-auto flex w-full flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Topics</h1>
