@@ -1,9 +1,5 @@
 import type { TopicStoreItem, ProblemStoreItem } from "@/types/topics";
 
-function generateId(): string {
-  return crypto.randomUUID();
-}
-
 export function getAllProblems(topic: TopicStoreItem): ProblemStoreItem[] {
   const all = [...topic.problems];
   for (const subtopic of topic.subtopics) {
