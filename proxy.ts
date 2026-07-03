@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
-import { isAuthPage, MIDDLEWARE_MATCHER } from "@/lib/routes"
+import { isAuthPage } from "@/lib/routes"
 
 export default async function proxy(request: NextRequest) {
   const session = await auth()
@@ -19,5 +19,5 @@ export default async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: MIDDLEWARE_MATCHER,
+  matcher: ["/dashboard", "/dashboard/:path*", "/topics", "/topics/:path*", "/login", "/register"],
 }
