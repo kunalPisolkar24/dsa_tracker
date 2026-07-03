@@ -35,6 +35,53 @@ export interface BatchChanges {
   hasAny: boolean;
 }
 
+export function moveProblemBetweenContainers(
+  topics: TopicStoreItem[],
+  topicIdx: number,
+  problemId: string,
+  sourceSubTopicIdx: number | null,
+  targetSubTopicId: string | null,
+  updatedProblem: ProblemStoreItem
+): TopicStoreItem[] {
+  return topics.map((t, ti) => {
+    if (ti !== topicIdx) return t;
+
+    let updatedTopic = t;
+
+    if (sourceSubTopicIdx === null) {
+      updatedTopic = {
+        ...updatedTopic,
+        problems: updatedTopic.problems.filter((p) => p.id !== problemId),
+      };
+    } else {
+      updatedTopic = {
+        ...updatedTopic,
+        subtopics: updatedTopic.subtopics.map((s, si) =>
+          si !== sourceSubTopicIdx
+            ? s
+            : { ...s, problems: s.problems.filter((p) => p.id !== problemId) }
+        ),
+      };
+    }
+
+    if (targetSubTopicId === null) {
+      return {
+        ...updatedTopic,
+        problems: [...updatedTopic.problems, updatedProblem],
+      };
+    }
+
+    return {
+      ...updatedTopic,
+      subtopics: updatedTopic.subtopics.map((s) =>
+        s.id !== targetSubTopicId
+          ? s
+          : { ...s, problems: [...s.problems, updatedProblem] }
+      ),
+    };
+  });
+}
+
 export function computeBatchChanges(
   original: TopicStoreItem,
   draft: TopicStoreItem

@@ -22,6 +22,7 @@ import {
 import * as topicService from "@/lib/services/topic-service";
 import * as subTopicService from "@/lib/services/subtopic-service";
 import * as problemService from "@/lib/services/problem-service";
+import { moveProblemBetweenContainers } from "@/lib/topic-diff";
 
 interface TopicStoreState {
   topics: TopicStoreItem[];
@@ -385,43 +386,10 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
         const updatedProblem = updateProblemService(oldProblem, input);
 
         return {
-          topics: state.topics.map((t, ti) => {
-            if (ti !== topicIdx) return t;
-
-            let updatedTopic = t;
-
-            if (subTopicIdx === null) {
-              updatedTopic = {
-                ...updatedTopic,
-                problems: updatedTopic.problems.filter((p) => p.id !== problemId),
-              };
-            } else {
-              updatedTopic = {
-                ...updatedTopic,
-                subtopics: updatedTopic.subtopics.map((s, si) =>
-                  si !== subTopicIdx
-                    ? s
-                    : { ...s, problems: s.problems.filter((p) => p.id !== problemId) }
-                ),
-              };
-            }
-
-            if (input.subTopicId === null) {
-              return {
-                ...updatedTopic,
-                problems: [...updatedTopic.problems, updatedProblem],
-              };
-            }
-
-            return {
-              ...updatedTopic,
-              subtopics: updatedTopic.subtopics.map((s) =>
-                s.id !== input.subTopicId
-                  ? s
-                  : { ...s, problems: [...s.problems, updatedProblem] }
-              ),
-            };
-          }),
+          topics: moveProblemBetweenContainers(
+            state.topics, topicIdx, problemId,
+            subTopicIdx, input.subTopicId!, updatedProblem
+          ),
         };
       });
     } else {
