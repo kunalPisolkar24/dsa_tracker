@@ -232,28 +232,32 @@ export function useTopicDetail(topicId: string) {
 
     setIsSaving(true);
     try {
-      const operations: Promise<unknown>[] = [];
+      const otherOperations: Promise<unknown>[] = [];
 
       for (const st of changes.subtopicUpdates) {
-        operations.push(subTopicService.updateSubTopic(st.id, st.input));
+        otherOperations.push(subTopicService.updateSubTopic(st.id, st.input));
       }
       for (const id of changes.subtopicDeletes) {
-        operations.push(subTopicService.deleteSubTopic(id));
+        otherOperations.push(subTopicService.deleteSubTopic(id));
       }
       for (const p of changes.problemUpdates) {
-        operations.push(problemService.updateProblem(p.id, p.input));
+        otherOperations.push(problemService.updateProblem(p.id, p.input));
       }
       for (const id of changes.problemDeletes) {
-        operations.push(problemService.deleteProblem(id));
-      }
-      for (const ids of changes.problemReorders) {
-        operations.push(problemService.reorderProblems(ids));
+        otherOperations.push(problemService.deleteProblem(id));
       }
 
-      const results = await Promise.allSettled(operations);
-      const allOk = results.every(
+      const otherResults = await Promise.allSettled(otherOperations);
+      let allOk = otherResults.every(
         (r) => r.status === "fulfilled" && r.value !== null && r.value !== false
       );
+
+      for (const ids of changes.problemReorders) {
+        const result = await problemService.reorderProblems(ids);
+        if (result === null || result === false) {
+          allOk = false;
+        }
+      }
 
       const dbTopics = await topicService.getTopics();
       const updatedTopic = dbTopics.find((t: TopicStoreItem) => t.id === topicId);
