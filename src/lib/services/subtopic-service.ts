@@ -8,6 +8,8 @@ import * as topicRepo from "@/lib/repositories/topic-repository";
 import type { SubTopicStoreItem } from "@/types/topics";
 import type { CreateSubTopicInput, UpdateSubTopicInput } from "@/lib/schemas";
 
+export type SubTopicRepository = typeof subTopicRepo;
+
 export async function createSubTopic(
   topicId: string,
   input: Omit<CreateSubTopicInput, "topicId">

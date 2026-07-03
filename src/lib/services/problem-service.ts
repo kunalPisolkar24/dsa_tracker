@@ -4,8 +4,12 @@ import { auth } from "@/lib/auth";
 import { logger } from "@/lib/logger";
 import { logActivity } from "@/lib/services/activity-service";
 import type { ProblemStoreItem } from "@/types/topics";
+
+export type ActivityServiceForProblems = Pick<typeof import("@/lib/services/activity-service"), "logActivity">;
 import type { CreateProblemInput, UpdateProblemInput } from "@/lib/schemas";
 import * as problemRepo from "@/lib/repositories/problem-repository";
+
+export type ProblemRepository = typeof problemRepo;
 
 function mapProblem(p: problemRepo.ProblemScalarFields): ProblemStoreItem {
   return {

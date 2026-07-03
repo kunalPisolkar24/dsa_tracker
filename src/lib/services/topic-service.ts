@@ -7,6 +7,8 @@ import * as topicRepo from "@/lib/repositories/topic-repository";
 import type { TopicStoreItem } from "@/types/topics";
 import type { CreateTopicInput, UpdateTopicInput } from "@/lib/schemas";
 
+export type TopicRepository = typeof topicRepo;
+
 async function getUserId(): Promise<string | null> {
   const session = await auth();
   return session?.user?.id ?? null;
