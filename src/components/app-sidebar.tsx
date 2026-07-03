@@ -71,11 +71,6 @@ export function AppSidebar({ user, navItems }: AppSidebarProps) {
                     asChild
                     isActive={pathname === item.href}
                     tooltip={item.title}
-                    className={
-                      pathname === item.href
-                        ? "bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary hover:text-sidebar-primary-foreground"
-                        : ""
-                    }
                   >
                     <Link
                       href={item.href}
