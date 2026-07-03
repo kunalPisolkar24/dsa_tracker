@@ -22,6 +22,11 @@
   --color-chart-3: var(--chart-3);
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
+  --color-chart-solved: var(--chart-solved);
+  --color-chart-review: var(--chart-review);
+  --color-chart-easy: var(--chart-easy);
+  --color-chart-medium: var(--chart-medium);
+  --color-chart-hard: var(--chart-hard);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -71,6 +76,11 @@
   --chart-3: oklch(0.546 0.245 262.881);
   --chart-4: oklch(0.488 0.243 264.376);
   --chart-5: oklch(0.424 0.199 265.638);
+  --chart-solved: oklch(0.696 0.17 148.02);
+  --chart-review: oklch(0.606 0.25 292.72);
+  --chart-easy: oklch(0.69 0.18 155);
+  --chart-medium: oklch(0.72 0.19 85);
+  --chart-hard: oklch(0.55 0.23 25);
   --radius: 0.45rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
@@ -106,6 +116,11 @@
   --chart-3: oklch(0.546 0.245 262.881);
   --chart-4: oklch(0.488 0.243 264.376);
   --chart-5: oklch(0.424 0.199 265.638);
+  --chart-solved: oklch(0.765 0.177 163.223);
+  --chart-review: oklch(0.702 0.183 293.541);
+  --chart-easy: oklch(0.76 0.17 160);
+  --chart-medium: oklch(0.78 0.17 80);
+  --chart-hard: oklch(0.68 0.20 22);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.623 0.214 259.815);
@@ -119,12 +134,18 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
   }
   body {
     @apply bg-background text-foreground;
   }
   html {
     @apply font-sans;
+  }
+
+  .recharts-pie-sector path {
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   /* browser autofill overrides */
@@ -137,6 +158,29 @@
     transition: background-color 5000s ease-in-out 0s;
     caret-color: var(--foreground);
     border-radius: inherit;
+  }
+
+  /* minimal scrollbar */
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
+  }
+
+  *::-webkit-scrollbar-button {
+    display: none;
   }
 
   input:autofill {

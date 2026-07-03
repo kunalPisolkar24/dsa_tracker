@@ -5,7 +5,7 @@ export const StatsCardsSkeleton = memo(function StatsCardsSkeleton() {
   return (
     <div
       data-slot="card"
-      className="group/card flex flex-col gap-4 overflow-hidden rounded-xl bg-card p-4 text-sm text-card-foreground ring-1 ring-foreground/10 col-span-1 sm:col-span-2 md:col-span-2"
+      className="group/card flex flex-col gap-4 overflow-hidden rounded-xl bg-card p-4 text-sm text-card-foreground ring-1 ring-foreground/10 col-span-1 md:col-span-2"
       aria-hidden="true"
     >
       <div className="flex items-center gap-2 pb-2">
@@ -150,12 +150,11 @@ export const RecentActivitySkeleton = memo(function RecentActivitySkeleton() {
         <Skeleton className="h-3 w-44" />
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[500px] text-sm">
           <thead>
             <tr className="border-b border-border">
               <th className="px-4 py-3"><Skeleton className="h-3 w-4" /></th>
               <th className="px-4 py-3"><Skeleton className="h-3 w-14" /></th>
-              <th className="hidden px-4 py-3 sm:table-cell"><Skeleton className="h-3 w-10" /></th>
               <th className="px-4 py-3"><Skeleton className="h-3 w-14" /></th>
               <th className="px-4 py-3"><Skeleton className="h-3 w-12" /></th>
             </tr>
@@ -165,7 +164,6 @@ export const RecentActivitySkeleton = memo(function RecentActivitySkeleton() {
               <tr key={i} className="border-b border-border">
                 <td className="px-4 py-3"><Skeleton className="h-3 w-4" /></td>
                 <td className="px-4 py-3"><Skeleton className="h-3 w-32" /></td>
-                <td className="hidden px-4 py-3 sm:table-cell"><Skeleton className="h-5 w-16 rounded-full" /></td>
                 <td className="px-4 py-3"><Skeleton className="h-5 w-14 rounded-full" /></td>
                 <td className="px-4 py-3"><Skeleton className="h-3 w-16" /></td>
               </tr>
@@ -185,11 +183,11 @@ export const DashboardShellSkeleton = memo(function DashboardShellSkeleton() {
       aria-busy="true"
     >
       <span className="sr-only">Loading dashboard...</span>
-      <div className="grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 md:grid-cols-3">
+      <div className="grid grid-cols-1 items-stretch gap-6 md:grid-cols-2 lg:grid-cols-3">
         <StatsCardsSkeleton />
         <DonutChartSkeleton />
       </div>
-      <div className="grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-2">
+      <div className="grid grid-cols-1 items-stretch gap-6 md:grid-cols-2">
         <TopicRadarSkeleton />
         <ReviewRadialSkeleton />
       </div>

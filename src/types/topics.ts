@@ -22,6 +22,7 @@ export interface ProblemStoreItem {
   subTopicId?: string | null;
   notes?: string;
   reviewCount: number;
+  sortOrder: number;
   solvedAt?: string;
 }
 

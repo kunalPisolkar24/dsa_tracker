@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import type { TopicStoreItem, SubTopicStoreItem, ProblemStoreItem } from "@/types/topics";
+import type { TopicStoreItem, ProblemStoreItem } from "@/types/topics";
 import type {
   CreateTopicInput,
   UpdateTopicInput,
@@ -18,21 +18,10 @@ import {
   createProblemService,
   updateProblemService,
   moveProblemInArray,
-} from "@/lib/topic-service";
-import {
-  getTopics as fetchTopicsFromDb,
-  createTopic as createTopicInDb,
-  updateTopic as updateTopicInDb,
-  deleteTopic as deleteTopicInDb,
-  createSubTopic as createSubTopicInDb,
-  updateSubTopic as updateSubTopicInDb,
-  deleteSubTopic as deleteSubTopicInDb,
-  createProblem as createProblemInDb,
-  updateProblem as updateProblemInDb,
-  deleteProblem as deleteProblemInDb,
-  updateProblemStatus as updateProblemStatusInDb,
-  updateProblemReviewCount as updateProblemReviewCountInDb,
-} from "@/lib/topic-crud";
+} from "@/lib/topic-utils";
+import * as topicService from "@/lib/services/topic-service";
+import * as subTopicService from "@/lib/services/subtopic-service";
+import * as problemService from "@/lib/services/problem-service";
 
 interface TopicStoreState {
   topics: TopicStoreItem[];
@@ -43,18 +32,19 @@ interface TopicStoreState {
 
 interface TopicStoreActions {
   hydrate: () => Promise<void>;
-  addTopic: (input: CreateTopicInput) => TopicStoreItem;
+  addTopic: (input: CreateTopicInput) => Promise<boolean>;
   updateTopic: (id: string, input: UpdateTopicInput) => void;
   removeTopic: (id: string) => void;
-  addSubTopic: (topicId: string, input: Omit<CreateSubTopicInput, "topicId">) => SubTopicStoreItem;
+  addSubTopic: (topicId: string, input: Omit<CreateSubTopicInput, "topicId">) => Promise<boolean>;
   updateSubTopic: (topicId: string, subTopicId: string, input: UpdateSubTopicInput) => void;
   removeSubTopic: (topicId: string, subTopicId: string) => void;
-  addProblem: (topicId: string, input: Omit<CreateProblemInput, "topicId">) => ProblemStoreItem;
+  addProblem: (topicId: string, input: Omit<CreateProblemInput, "topicId">) => Promise<boolean>;
   updateProblem: (topicId: string, problemId: string, input: UpdateProblemInput) => void;
   removeProblem: (topicId: string, problemId: string) => void;
   updateProblemStatus: (topicId: string, problemId: string, status: ProblemStoreItem["status"]) => void;
   updateProblemReviewCount: (topicId: string, problemId: string, reviewCount: number) => void;
-  moveProblem: (topicId: string, problemId: string, direction: "up" | "down") => void;
+  moveProblem: (topicId: string, problemId: string, direction: "up" | "down") => Promise<void>;
+  replaceTopic: (topicId: string, updated: TopicStoreItem) => void;
 }
 
 type TopicStore = TopicStoreState & TopicStoreActions;
@@ -89,7 +79,7 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
     if (get().hydrated) return;
     set({ hydrating: true });
     try {
-      const dbTopics = await fetchTopicsFromDb();
+      const dbTopics = await topicService.getTopics();
       if (dbTopics.length > 0) {
         set({ topics: dbTopics, hydrated: true, hydrating: false, hydrationError: false });
       } else {
@@ -100,36 +90,50 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
     }
   },
 
-  addTopic: (input) => {
+  addTopic: async (input) => {
+    const snapshot = get().topics;
     const newTopic = createTopicService(input);
     set((state) => ({ topics: [...state.topics, newTopic] }));
-    createTopicInDb(input).then((dbTopic) => {
+    try {
+      const dbTopic = await topicService.createTopic(input);
       if (dbTopic) {
         set((state) => ({
           topics: state.topics.map((t) => (t.id === newTopic.id ? dbTopic : t)),
         }));
+        return true;
       }
-    });
-    return newTopic;
+      set({ topics: snapshot });
+      return false;
+    } catch {
+      set({ topics: snapshot });
+      return false;
+    }
   },
 
   updateTopic: (id, input) => {
+    const snapshot = get().topics;
     set((state) => ({
       topics: state.topics.map((t) =>
         t.id === id ? updateTopicService(t, input) : t
       ),
     }));
-    updateTopicInDb(id, input);
+    topicService.updateTopic(id, input).then((dbTopic) => {
+      if (!dbTopic) set({ topics: snapshot });
+    });
   },
 
   removeTopic: (id) => {
+    const snapshot = get().topics;
     set((state) => ({
       topics: state.topics.filter((t) => t.id !== id),
     }));
-    deleteTopicInDb(id);
+    topicService.deleteTopic(id).then((success) => {
+      if (!success) set({ topics: snapshot });
+    });
   },
 
-  addSubTopic: (topicId, input) => {
+  addSubTopic: async (topicId, input) => {
+    const snapshot = get().topics;
     const newSubTopic = createSubTopicService({ ...input, topicId });
     set((state) => ({
       topics: state.topics.map((t) =>
@@ -138,7 +142,8 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
           : t
       ),
     }));
-    createSubTopicInDb(topicId, input).then((dbSubTopic) => {
+    try {
+      const dbSubTopic = await subTopicService.createSubTopic(topicId, input);
       if (dbSubTopic) {
         set((state) => ({
           topics: state.topics.map((t) =>
@@ -152,12 +157,18 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
               : t
           ),
         }));
+        return true;
       }
-    });
-    return newSubTopic;
+      set({ topics: snapshot });
+      return false;
+    } catch {
+      set({ topics: snapshot });
+      return false;
+    }
   },
 
   updateSubTopic: (topicId, subTopicId, input) => {
+    const snapshot = get().topics;
     set((state) => ({
       topics: state.topics.map((t) =>
         t.id !== topicId
@@ -170,10 +181,13 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
             }
       ),
     }));
-    updateSubTopicInDb(subTopicId, input);
+    subTopicService.updateSubTopic(subTopicId, input).then((dbSubTopic) => {
+      if (!dbSubTopic) set({ topics: snapshot });
+    });
   },
 
   removeSubTopic: (topicId, subTopicId) => {
+    const snapshot = get().topics;
     set((state) => ({
       topics: state.topics.map((t) =>
         t.id === topicId
@@ -181,11 +195,20 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
           : t
       ),
     }));
-    deleteSubTopicInDb(subTopicId);
+    subTopicService.deleteSubTopic(subTopicId).then((success) => {
+      if (!success) set({ topics: snapshot });
+    });
   },
 
-  addProblem: (topicId, input) => {
-    const newProblem = createProblemService({ ...input, topicId });
+  addProblem: async (topicId, input) => {
+    const snapshot = get().topics;
+    const topic = get().topics.find((t) => t.id === topicId);
+    const existingProblems = topic
+      ? input.subTopicId
+        ? topic.subtopics.find((s) => s.id === input.subTopicId)?.problems
+        : topic.problems
+      : undefined;
+    const newProblem = createProblemService({ ...input, topicId }, existingProblems);
     set((state) => ({
       topics: state.topics.map((t) => {
         if (t.id !== topicId) return t;
@@ -202,7 +225,8 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
         return { ...t, problems: [...t.problems, newProblem] };
       }),
     }));
-    createProblemInDb(topicId, input).then((dbProblem) => {
+    try {
+      const dbProblem = await problemService.createProblem(topicId, input);
       if (dbProblem) {
         set((state) => ({
           topics: state.topics.map((t) => {
@@ -222,47 +246,143 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
             return { ...t, problems: updateProblemInList(t.problems) };
           }),
         }));
+        return true;
       }
-    });
-    return newProblem;
+      set({ topics: snapshot });
+      return false;
+    } catch {
+      set({ topics: snapshot });
+      return false;
+    }
   },
 
   updateProblem: (topicId, problemId, input) => {
-    set((state) => {
-      const container = findProblemContainer(state.topics, topicId, problemId);
-      if (!container) return state;
+    const snapshot = get().topics;
 
-      return {
-        topics: state.topics.map((t, ti) => {
-          if (ti !== container.topicIdx) return t;
-          if (container.subTopicIdx === null) {
+    if (input.subTopicId !== undefined) {
+      set((state) => {
+        const container = findProblemContainer(state.topics, topicId, problemId);
+        if (!container) return state;
+
+        const { topicIdx, subTopicIdx, problemIdx } = container;
+        const topic = state.topics[topicIdx];
+
+        const oldProblem = subTopicIdx === null
+          ? topic.problems[problemIdx]
+          : topic.subtopics[subTopicIdx].problems[problemIdx];
+
+        if (oldProblem.subTopicId === input.subTopicId) {
+          return {
+            topics: state.topics.map((t, ti) => {
+              if (ti !== topicIdx) return t;
+              if (subTopicIdx === null) {
+                return {
+                  ...t,
+                  problems: t.problems.map((p) =>
+                    p.id === problemId ? updateProblemService(p, input) : p
+                  ),
+                };
+              }
+              return {
+                ...t,
+                subtopics: t.subtopics.map((s, si) =>
+                  si !== subTopicIdx
+                    ? s
+                    : {
+                        ...s,
+                        problems: s.problems.map((p) =>
+                          p.id === problemId ? updateProblemService(p, input) : p
+                        ),
+                      }
+                ),
+              };
+            }),
+          };
+        }
+
+        const updatedProblem = updateProblemService(oldProblem, input);
+
+        return {
+          topics: state.topics.map((t, ti) => {
+            if (ti !== topicIdx) return t;
+
+            let updatedTopic = t;
+
+            if (subTopicIdx === null) {
+              updatedTopic = {
+                ...updatedTopic,
+                problems: updatedTopic.problems.filter((p) => p.id !== problemId),
+              };
+            } else {
+              updatedTopic = {
+                ...updatedTopic,
+                subtopics: updatedTopic.subtopics.map((s, si) =>
+                  si !== subTopicIdx
+                    ? s
+                    : { ...s, problems: s.problems.filter((p) => p.id !== problemId) }
+                ),
+              };
+            }
+
+            if (input.subTopicId === null) {
+              return {
+                ...updatedTopic,
+                problems: [...updatedTopic.problems, updatedProblem],
+              };
+            }
+
             return {
-              ...t,
-              problems: t.problems.map((p) =>
-                p.id === problemId ? updateProblemService(p, input) : p
+              ...updatedTopic,
+              subtopics: updatedTopic.subtopics.map((s) =>
+                s.id !== input.subTopicId
+                  ? s
+                  : { ...s, problems: [...s.problems, updatedProblem] }
               ),
             };
-          }
-          return {
-            ...t,
-            subtopics: t.subtopics.map((s, si) =>
-              si !== container.subTopicIdx
-                ? s
-                : {
-                    ...s,
-                    problems: s.problems.map((p) =>
-                      p.id === problemId ? updateProblemService(p, input) : p
-                    ),
-                  }
-            ),
-          };
-        }),
-      };
+          }),
+        };
+      });
+    } else {
+      set((state) => {
+        const container = findProblemContainer(state.topics, topicId, problemId);
+        if (!container) return state;
+
+        return {
+          topics: state.topics.map((t, ti) => {
+            if (ti !== container.topicIdx) return t;
+            if (container.subTopicIdx === null) {
+              return {
+                ...t,
+                problems: t.problems.map((p) =>
+                  p.id === problemId ? updateProblemService(p, input) : p
+                ),
+              };
+            }
+            return {
+              ...t,
+              subtopics: t.subtopics.map((s, si) =>
+                si !== container.subTopicIdx
+                  ? s
+                  : {
+                      ...s,
+                      problems: s.problems.map((p) =>
+                        p.id === problemId ? updateProblemService(p, input) : p
+                      ),
+                    }
+              ),
+            };
+          }),
+        };
+      });
+    }
+
+    problemService.updateProblem(problemId, input).then((dbProblem) => {
+      if (!dbProblem) set({ topics: snapshot });
     });
-    updateProblemInDb(problemId, input);
   },
 
   removeProblem: (topicId, problemId) => {
+    const snapshot = get().topics;
     set((state) => {
       const container = findProblemContainer(state.topics, topicId, problemId);
       if (!container) return state;
@@ -287,100 +407,176 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
         }),
       };
     });
-    deleteProblemInDb(problemId);
+    problemService.deleteProblem(problemId).then((success) => {
+      if (!success) set({ topics: snapshot });
+    });
   },
 
-  updateProblemStatus: (topicId, problemId, status) => {
-    set((state) => {
-      const container = findProblemContainer(state.topics, topicId, problemId);
-      if (!container) return state;
+  updateProblemStatus: (() => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let pendingProblemId: string | null = null;
+    let pendingStatus: ProblemStoreItem["status"] | null = null;
+    let snapshot: TopicStoreItem[] = [];
 
-      return {
-        topics: state.topics.map((t, ti) => {
-          if (ti !== container.topicIdx) return t;
-          if (container.subTopicIdx === null) {
+    return (topicId: string, problemId: string, status: ProblemStoreItem["status"]) => {
+      if (timer === null) {
+        snapshot = get().topics;
+      }
+
+      set((state) => {
+        const container = findProblemContainer(state.topics, topicId, problemId);
+        if (!container) return state;
+
+        return {
+          topics: state.topics.map((t, ti) => {
+            if (ti !== container.topicIdx) return t;
+            if (container.subTopicIdx === null) {
+              return {
+                ...t,
+                problems: t.problems.map((p) =>
+                  p.id === problemId
+                    ? {
+                        ...p,
+                        status,
+                        ...(status === "SOLVED" ? { solvedAt: new Date().toISOString() } : {}),
+                      }
+                    : p
+                ),
+              };
+            }
             return {
               ...t,
-              problems: t.problems.map((p) =>
-                p.id === problemId
-                  ? {
-                      ...p,
-                      status,
-                      ...(status === "SOLVED" ? { solvedAt: new Date().toISOString() } : {}),
+              subtopics: t.subtopics.map((s, si) =>
+                si !== container.subTopicIdx
+                  ? s
+                  : {
+                      ...s,
+                      problems: s.problems.map((p) =>
+                        p.id === problemId
+                          ? {
+                              ...p,
+                              status,
+                              ...(status === "SOLVED" ? { solvedAt: new Date().toISOString() } : {}),
+                            }
+                          : p
+                      ),
                     }
-                  : p
               ),
             };
-          }
-          return {
-            ...t,
-            subtopics: t.subtopics.map((s, si) =>
-              si !== container.subTopicIdx
-                ? s
-                : {
-                    ...s,
-                    problems: s.problems.map((p) =>
-                      p.id === problemId
-                        ? {
-                            ...p,
-                            status,
-                            ...(status === "SOLVED" ? { solvedAt: new Date().toISOString() } : {}),
-                          }
-                        : p
-                    ),
-                  }
-            ),
-          };
-        }),
-      };
-    });
-    updateProblemStatusInDb(problemId, status);
-  },
+          }),
+        };
+      });
 
-  updateProblemReviewCount: (topicId, problemId, reviewCount) => {
-    set((state) => {
-      const container = findProblemContainer(state.topics, topicId, problemId);
-      if (!container) return state;
+      pendingProblemId = problemId;
+      pendingStatus = status;
 
-      return {
-        topics: state.topics.map((t, ti) => {
-          if (ti !== container.topicIdx) return t;
-          if (container.subTopicIdx === null) {
+      if (timer !== null) {
+        clearTimeout(timer);
+      }
+
+      timer = setTimeout(async () => {
+        const id = pendingProblemId!;
+        const st = pendingStatus!;
+        const snap = snapshot;
+        timer = null;
+        pendingProblemId = null;
+        pendingStatus = null;
+
+        const result = await problemService.updateProblemStatus(id, st);
+        if (!result) set({ topics: snap });
+      }, 300);
+    };
+  })(),
+
+  updateProblemReviewCount: (() => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let pendingProblemId: string | null = null;
+    let pendingReviewCount: number | null = null;
+    let snapshot: TopicStoreItem[] = [];
+
+    return (topicId: string, problemId: string, reviewCount: number) => {
+      if (timer === null) {
+        snapshot = get().topics;
+      }
+
+      set((state) => {
+        const container = findProblemContainer(state.topics, topicId, problemId);
+        if (!container) return state;
+
+        return {
+          topics: state.topics.map((t, ti) => {
+            if (ti !== container.topicIdx) return t;
+            if (container.subTopicIdx === null) {
+              return {
+                ...t,
+                problems: t.problems.map((p) =>
+                  p.id === problemId ? { ...p, reviewCount } : p
+                ),
+              };
+            }
             return {
               ...t,
-              problems: t.problems.map((p) =>
-                p.id === problemId ? { ...p, reviewCount } : p
+              subtopics: t.subtopics.map((s, si) =>
+                si !== container.subTopicIdx
+                  ? s
+                  : {
+                      ...s,
+                      problems: s.problems.map((p) =>
+                        p.id === problemId ? { ...p, reviewCount } : p
+                      ),
+                    }
               ),
             };
-          }
-          return {
-            ...t,
-            subtopics: t.subtopics.map((s, si) =>
-              si !== container.subTopicIdx
-                ? s
-                : {
-                    ...s,
-                    problems: s.problems.map((p) =>
-                      p.id === problemId ? { ...p, reviewCount } : p
-                    ),
-                  }
-            ),
-          };
-        }),
-      };
-    });
-    updateProblemReviewCountInDb(problemId, reviewCount);
-  },
+          }),
+        };
+      });
 
-  moveProblem: (topicId, problemId, direction) => {
-    set((state) => {
-      const container = findProblemContainer(state.topics, topicId, problemId);
-      if (!container) return state;
+      pendingProblemId = problemId;
+      pendingReviewCount = reviewCount;
 
-      return {
+      if (timer !== null) {
+        clearTimeout(timer);
+      }
+
+      timer = setTimeout(async () => {
+        const id = pendingProblemId!;
+        const count = pendingReviewCount!;
+        const snap = snapshot;
+        timer = null;
+        pendingProblemId = null;
+        pendingReviewCount = null;
+
+        const result = await problemService.updateProblemReviewCount(id, count);
+        if (!result) set({ topics: snap });
+      }, 300);
+    };
+  })(),
+
+  moveProblem: (() => {
+    let reorderTimer: ReturnType<typeof setTimeout> | null = null;
+    let pendingProblemIds: string[] = [];
+
+    return async function moveProblem(
+      this: void,
+      topicId: string,
+      problemId: string,
+      direction: "up" | "down"
+    ) {
+      const container = findProblemContainer(get().topics, topicId, problemId);
+      if (!container) return;
+      const { topicIdx, subTopicIdx, problemIdx } = container;
+
+      const problems = subTopicIdx === null
+        ? get().topics[topicIdx].problems
+        : get().topics[topicIdx].subtopics[subTopicIdx].problems;
+
+      const targetIdx = direction === "up" ? problemIdx - 1 : problemIdx + 1;
+      if (targetIdx < 0 || targetIdx >= problems.length) return;
+
+      set((state) => ({
         topics: state.topics.map((t, ti) => {
-          if (ti !== container.topicIdx) return t;
-          if (container.subTopicIdx === null) {
+          if (ti !== topicIdx) return t;
+          if (subTopicIdx === null) {
             return {
               ...t,
               problems: moveProblemInArray(t.problems, problemId, direction),
@@ -389,16 +585,43 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
           return {
             ...t,
             subtopics: t.subtopics.map((s, si) =>
-              si !== container.subTopicIdx
+              si !== subTopicIdx
                 ? s
-                : {
-                    ...s,
-                    problems: moveProblemInArray(s.problems, problemId, direction),
-                  }
+                : { ...s, problems: moveProblemInArray(s.problems, problemId, direction) }
             ),
           };
         }),
-      };
-    });
+      }));
+
+      const updatedState = get().topics;
+      pendingProblemIds = (subTopicIdx === null
+        ? updatedState[topicIdx].problems
+        : updatedState[topicIdx].subtopics[subTopicIdx].problems
+      ).map((p) => p.id);
+
+      if (reorderTimer !== null) {
+        clearTimeout(reorderTimer);
+      }
+
+      reorderTimer = setTimeout(async () => {
+        const idsToReorder = pendingProblemIds;
+        pendingProblemIds = [];
+
+        const success = await problemService.reorderProblems(idsToReorder);
+
+        if (!success) {
+          const dbTopics = await topicService.getTopics();
+          if (dbTopics.length > 0) {
+            set({ topics: dbTopics });
+          }
+        }
+      }, 300);
+    };
+  })(),
+
+  replaceTopic: (topicId, updated) => {
+    set((state) => ({
+      topics: state.topics.map((t) => (t.id === topicId ? updated : t)),
+    }));
   },
 }));

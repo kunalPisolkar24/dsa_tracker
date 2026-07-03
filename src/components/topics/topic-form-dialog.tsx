@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { createTopicSchema, updateTopicSchema } from "@/lib/schemas";
 import type { CreateTopicInput } from "@/lib/schemas";
 
@@ -21,7 +22,7 @@ interface TopicFormDialogProps {
   mode: "create" | "edit";
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (input: CreateTopicInput) => void;
+  onSubmit: (input: CreateTopicInput) => Promise<boolean>;
   initialValues?: {
     name: string;
     description?: string;
@@ -46,7 +47,7 @@ export function TopicFormDialog({
     ? "Update the topic details below."
     : "Add a new topic to track your problems.";
 
-  function handleSubmit() {
+  async function handleSubmit() {
     setErrors({});
     const schema = isEdit ? updateTopicSchema : createTopicSchema;
     const result = schema.safeParse({
@@ -62,10 +63,23 @@ export function TopicFormDialog({
     }
     setIsSubmitting(true);
     try {
-      onSubmit(result.data as CreateTopicInput);
-      setName("");
-      setDescription("");
-      onOpenChange(false);
+      if (isEdit) {
+        onSubmit(result.data as CreateTopicInput);
+        onOpenChange(false);
+      } else {
+        const success = await onSubmit(result.data as CreateTopicInput);
+        if (success) {
+          setName("");
+          setDescription("");
+          onOpenChange(false);
+        } else {
+          toast.error("Failed to create topic");
+        }
+      }
+    } catch {
+      if (!isEdit) {
+        toast.error("An unexpected error occurred");
+      }
     } finally {
       setIsSubmitting(false);
     }

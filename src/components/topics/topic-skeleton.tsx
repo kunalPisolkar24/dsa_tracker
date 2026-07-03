@@ -40,18 +40,10 @@ export const ProblemRowSkeleton = memo(function ProblemRowSkeleton() {
       className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-sm"
       aria-hidden="true"
     >
-      <div className="flex shrink-0 flex-col gap-0.5">
-        <Skeleton className="size-5 rounded" />
-        <Skeleton className="size-5 rounded" />
-      </div>
       <Skeleton className="h-4 flex-1" />
       <Skeleton className="h-5 w-16 rounded-full" />
       <Skeleton className="h-5 w-14 rounded-full" />
       <Skeleton className="h-7 w-12 rounded-md" />
-      <div className="flex shrink-0 gap-0.5">
-        <Skeleton className="size-7 rounded-md" />
-        <Skeleton className="size-7 rounded-md" />
-      </div>
     </div>
   );
 });
@@ -67,10 +59,6 @@ export const SubtopicSectionSkeleton = memo(function SubtopicSectionSkeleton() {
             <Skeleton className="h-3 w-3/5" />
           </div>
         </div>
-        <div className="flex shrink-0 gap-0.5">
-          <Skeleton className="size-7 rounded-md" />
-          <Skeleton className="size-7 rounded-md" />
-        </div>
       </div>
       <div className="space-y-1 pl-6">
         <div className="flex items-center justify-between">
@@ -79,10 +67,12 @@ export const SubtopicSectionSkeleton = memo(function SubtopicSectionSkeleton() {
         </div>
         <Skeleton className="h-2 w-full rounded-full" />
       </div>
-      <div className="space-y-2 pl-6">
-        <ProblemRowSkeleton />
-        <ProblemRowSkeleton />
-        <ProblemRowSkeleton />
+      <div className="overflow-x-auto pl-6">
+        <div className="flex w-max min-w-full flex-col gap-2">
+          <ProblemRowSkeleton />
+          <ProblemRowSkeleton />
+          <ProblemRowSkeleton />
+        </div>
       </div>
     </div>
   );
@@ -91,7 +81,7 @@ export const SubtopicSectionSkeleton = memo(function SubtopicSectionSkeleton() {
 export const TopicDetailSkeleton = memo(function TopicDetailSkeleton() {
   return (
     <div
-      className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8"
+      className="mx-auto flex w-full flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8"
       role="status"
       aria-busy="true"
     >

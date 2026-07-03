@@ -16,6 +16,7 @@ import { ProblemRow } from "@/components/topics/problem-row";
 interface SubtopicSectionProps {
   subtopic: SubTopicStoreItem;
   viewModel: SubtopicViewModel;
+  isEditing: boolean;
   onEdit: (subtopic: SubTopicStoreItem) => void;
   onDelete: (subtopic: SubTopicStoreItem) => void;
   onProblemStatusChange: (problemId: string, status: ProblemStoreItem["status"]) => void;
@@ -29,6 +30,7 @@ interface SubtopicSectionProps {
 export function SubtopicSection({
   subtopic,
   viewModel,
+  isEditing,
   onEdit,
   onDelete,
   onProblemStatusChange,
@@ -70,30 +72,32 @@ export function SubtopicSection({
             </button>
           </CollapsibleTrigger>
 
-          <div className="flex shrink-0 gap-0.5">
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit(subtopic);
-              }}
-              aria-label="Edit sub-topic"
-            >
-              <Pencil className="size-3" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(subtopic);
-              }}
-              aria-label="Delete sub-topic"
-            >
-              <Trash2 className="size-3" />
-            </Button>
-          </div>
+          {isEditing && (
+            <div className="flex shrink-0 gap-0.5">
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(subtopic);
+                }}
+                aria-label="Edit sub-topic"
+              >
+                <Pencil className="size-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(subtopic);
+                }}
+                aria-label="Delete sub-topic"
+              >
+                <Trash2 className="size-3" />
+              </Button>
+            </div>
+          )}
         </div>
 
         <div className="space-y-1 pl-6">
@@ -107,13 +111,14 @@ export function SubtopicSection({
         </div>
 
         <CollapsibleContent>
-          <div className="pt-3 pl-6">
+          <div className="overflow-x-auto pt-3 pl-6">
             {hasProblems ? (
-              <div className="space-y-2">
+              <div className="flex w-max min-w-full flex-col gap-2">
                 {subtopic.problems.map((problem, idx) => (
                   <ProblemRow
                     key={problem.id}
                     problem={problem}
+                    isEditing={isEditing}
                     isFirst={idx === 0}
                     isLast={idx === subtopic.problems.length - 1}
                     onStatusChange={onProblemStatusChange}

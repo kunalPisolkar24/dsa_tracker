@@ -14,13 +14,20 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { z } from "zod";
 import { createSubTopicSchema, updateSubTopicSchema } from "@/lib/schemas";
+
+const createSubTopicFormSchema = z.object({
+  name: createSubTopicSchema.shape.name,
+  description: createSubTopicSchema.shape.description,
+});
 
 interface SubtopicFormDialogProps {
   mode: "create" | "edit";
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (input: { name: string; description?: string }) => void;
+  onSubmit: (input: { name: string; description?: string }) => Promise<boolean>;
   initialValues?: {
     name: string;
     description?: string;
@@ -41,9 +48,9 @@ export function SubtopicFormDialog({
 
   const isEdit = mode === "edit";
 
-  function handleSubmit() {
+  async function handleSubmit() {
     setErrors({});
-    const schema = isEdit ? updateSubTopicSchema : createSubTopicSchema;
+    const schema = isEdit ? updateSubTopicSchema : createSubTopicFormSchema;
     const result = schema.safeParse({
       name: name.trim() || undefined,
       description: description.trim() || undefined,
@@ -57,15 +64,29 @@ export function SubtopicFormDialog({
     }
     setIsSubmitting(true);
     try {
-      onSubmit({
-        name: result.data.name ?? name.trim(),
-        description: result.data.description ?? (description.trim() || undefined),
-      });
-      if (!isEdit) {
-        setName("");
-        setDescription("");
+      if (isEdit) {
+        onSubmit({
+          name: result.data.name ?? name.trim(),
+          description: result.data.description ?? (description.trim() || undefined),
+        });
+        onOpenChange(false);
+      } else {
+        const success = await onSubmit({
+          name: result.data.name ?? name.trim(),
+          description: result.data.description ?? (description.trim() || undefined),
+        });
+        if (success) {
+          setName("");
+          setDescription("");
+          onOpenChange(false);
+        } else {
+          toast.error("Failed to create sub-topic");
+        }
       }
-      onOpenChange(false);
+    } catch {
+      if (!isEdit) {
+        toast.error("An unexpected error occurred");
+      }
     } finally {
       setIsSubmitting(false);
     }

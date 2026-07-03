@@ -15,6 +15,7 @@ function nextStatus(current: ProblemStoreItem["status"]): ProblemStoreItem["stat
 
 interface ProblemRowProps {
   problem: ProblemStoreItem;
+  isEditing: boolean;
   isFirst: boolean;
   isLast: boolean;
   onStatusChange: (problemId: string, status: ProblemStoreItem["status"]) => void;
@@ -27,6 +28,7 @@ interface ProblemRowProps {
 
 export function ProblemRow({
   problem,
+  isEditing,
   isFirst,
   isLast,
   onStatusChange,
@@ -42,40 +44,42 @@ export function ProblemRow({
 
   return (
     <div className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-sm">
-      <div className="flex shrink-0 flex-col gap-0.5">
-        <Button
-          variant="ghost"
-          size="icon-xs"
-          disabled={isFirst}
-          onClick={() => onMoveUp(problem.id)}
-          aria-label="Move up"
-        >
-          <ArrowUp className="size-3" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon-xs"
-          disabled={isLast}
-          onClick={() => onMoveDown(problem.id)}
-          aria-label="Move down"
-        >
-          <ArrowDown className="size-3" />
-        </Button>
-      </div>
+      {isEditing && (
+        <div className="flex shrink-0 flex-col gap-0.5">
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            disabled={isFirst}
+            onClick={() => onMoveUp(problem.id)}
+            aria-label="Move up"
+          >
+            <ArrowUp className="size-3" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            disabled={isLast}
+            onClick={() => onMoveDown(problem.id)}
+            aria-label="Move down"
+          >
+            <ArrowDown className="size-3" />
+          </Button>
+        </div>
+      )}
 
-      <div className="flex min-w-0 flex-1 items-center gap-2">
+      <div className="flex flex-1 items-center gap-2">
         {problem.url ? (
           <a
             href={problem.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="truncate font-medium underline-offset-2 hover:underline"
+            className="whitespace-nowrap font-medium underline-offset-2 hover:underline"
           >
             {problem.title}
             <ExternalLink className="ml-1 inline size-3 text-muted-foreground" />
           </a>
         ) : (
-          <span className="truncate font-medium">{problem.title}</span>
+          <span className="whitespace-nowrap font-medium">{problem.title}</span>
         )}
       </div>
 
@@ -110,24 +114,26 @@ export function ProblemRow({
         </span>
       )}
 
-      <div className="flex shrink-0 gap-0.5">
-        <Button
-          variant="ghost"
-          size="icon-xs"
-          onClick={() => onEdit(problem)}
-          aria-label="Edit problem"
-        >
-          <Pencil className="size-3" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon-xs"
-          onClick={() => onDelete(problem)}
-          aria-label="Delete problem"
-        >
-          <Trash2 className="size-3" />
-        </Button>
-      </div>
+      {isEditing && (
+        <div className="flex shrink-0 gap-0.5">
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            onClick={() => onEdit(problem)}
+            aria-label="Edit problem"
+          >
+            <Pencil className="size-3" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            onClick={() => onDelete(problem)}
+            aria-label="Delete problem"
+          >
+            <Trash2 className="size-3" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

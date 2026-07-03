@@ -88,7 +88,7 @@ export function DonutChart({
           {data.map((entry) => (
             <div key={entry.name} className="flex items-center gap-1.5">
               <span
-                className="size-2.5 rounded-full"
+                className="size-3 rounded-sm"
                 style={{ backgroundColor: entry.color }}
               />
               <span className="text-muted-foreground">

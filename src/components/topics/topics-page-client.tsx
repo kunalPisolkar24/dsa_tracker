@@ -18,7 +18,7 @@ import {
   filterTopics,
   paginateTopics,
   computeTopicCardViewModel,
-} from "@/lib/topic-service";
+} from "@/lib/topic-utils";
 import { LAYOUT } from "@/lib/constants";
 import type { CreateTopicInput } from "@/lib/schemas";
 import { TopicCard } from "@/components/topics/topic-card";
@@ -62,16 +62,15 @@ export function TopicsPageClient() {
     LAYOUT.PAGE_SIZE
   );
 
-  function handleCreate(input: CreateTopicInput) {
-    addTopic(input);
-    toast.success("Topic created successfully");
+  async function handleCreate(input: CreateTopicInput): Promise<boolean> {
+    return addTopic(input);
   }
 
-  function handleEdit(input: CreateTopicInput) {
-    if (!editTarget) return;
+  async function handleEdit(input: CreateTopicInput): Promise<boolean> {
+    if (!editTarget) return false;
     updateTopic(editTarget.id, input);
-    setEditTarget(null);
     toast.success("Topic updated successfully");
+    return true;
   }
 
   function handleDelete() {
@@ -89,7 +88,7 @@ export function TopicsPageClient() {
   const hasFilteredResults = paginatedTopics.length > 0;
 
   return (
-    <div className={`mx-auto flex w-full ${LAYOUT.MAX_WIDTH} flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8`}>
+    <div className="mx-auto flex w-full flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Topics</h1>
@@ -114,7 +113,7 @@ export function TopicsPageClient() {
       <div className="flex-1">
         {!hydrated && (
           <div
-            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+            className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
             role="status"
             aria-busy="true"
           >
@@ -160,7 +159,7 @@ export function TopicsPageClient() {
 
         {hydrated && hasFilteredResults && (
           <>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {paginatedTopics.map((topic) => (
                 <TopicCard
                   key={topic.id}

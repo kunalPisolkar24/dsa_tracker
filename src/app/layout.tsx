@@ -17,6 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "DSA Tracker",
   description: "Track your Data Structures and Algorithms practice progress",
+  icons: "/circle-check-big.svg",
 };
 
 export default function RootLayout({

@@ -61,13 +61,13 @@ export const LAYOUT = {
 } as const;
 
 export const CHART_COLORS = {
-  EASY: "#22c55e",
-  MEDIUM: "#eab308",
-  HARD: "#ef4444",
-  SOLVED: "#3b82f6",
-  MARKED_FOR_REVIEW: "#a855f7",
-  GRID_STROKE: "#e5e7eb",
-  TICK_FILL: "#9ca3af",
-  RADAR_FILL: "#60a5fa",
-  TICK_COLOR: "#cbd5e1",
+  EASY: "var(--chart-easy)",
+  MEDIUM: "var(--chart-medium)",
+  HARD: "var(--chart-hard)",
+  SOLVED: "var(--chart-solved)",
+  MARKED_FOR_REVIEW: "var(--chart-review)",
+  GRID_STROKE: "var(--border)",
+  TICK_FILL: "var(--muted-foreground)",
+  RADAR_FILL: "var(--chart-4)",
+  TICK_COLOR: "var(--muted-foreground)",
 } as const;

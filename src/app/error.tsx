@@ -9,6 +9,7 @@ export default function ErrorPage({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  void error;
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center px-4 text-center">
       <div className="space-y-4">

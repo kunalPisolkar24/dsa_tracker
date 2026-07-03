@@ -1,5 +1,5 @@
 import type { TopicStoreItem } from "@/types/topics";
-import { getAllProblems } from "@/lib/topic-service";
+import { getAllProblems } from "@/lib/topic-utils";
 import { toDateStr } from "@/lib/date-utils";
 
 export interface DifficultyStats {
@@ -66,11 +66,15 @@ function countConsecutiveDays(
 }
 
 function flattenProblems(topics: TopicStoreItem[]): { problem: TopicStoreItem["problems"][number]; topicName: string }[] {
+  const seen = new Set<string>();
   const result: ReturnType<typeof flattenProblems> = [];
   for (const topic of topics) {
     const problems = getAllProblems(topic);
     for (const p of problems) {
-      result.push({ problem: p, topicName: topic.name });
+      if (!seen.has(p.id)) {
+        seen.add(p.id);
+        result.push({ problem: p, topicName: topic.name });
+      }
     }
   }
   return result;
@@ -96,7 +100,7 @@ function computeTopicRadarData(
   solvedProblems: { problem: TopicStoreItem["problems"][number]; topicName: string }[]
 ): TopicRadarEntry[] {
   const topicSolveCount = new Map<string, number>();
-  for (const { problem, topicName } of solvedProblems) {
+  for (const { topicName } of solvedProblems) {
     topicSolveCount.set(topicName, (topicSolveCount.get(topicName) ?? 0) + 1);
   }
   return Array.from(topicSolveCount.entries())
@@ -155,8 +159,13 @@ function computeHeatmap(now: Date, solveDateCounts: Map<string, number>): Heatma
 function computeRecentActivity(
   solvedProblems: { problem: TopicStoreItem["problems"][number]; topicName: string }[]
 ): RecentActivityEntry[] {
+  const seen = new Set<string>();
   return solvedProblems
-    .filter(({ problem }) => problem.solvedAt !== undefined)
+    .filter(({ problem }) => {
+      if (!problem.solvedAt || seen.has(problem.id)) return false;
+      seen.add(problem.id);
+      return true;
+    })
     .map(({ problem, topicName }) => ({
       id: problem.id,
       title: problem.title,

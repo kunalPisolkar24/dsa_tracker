@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { ChevronsUpDown, LogOut } from "lucide-react";
+import { ChevronsUpDown, LogOut, Sun, Moon } from "lucide-react";
 
 import {
   Sidebar,
@@ -26,7 +26,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useTheme } from "next-themes";
 import { useUIStore } from "@/stores/ui-store";
+import { useIsMobile } from "@/hooks/use-mobile";
 import type { NavItem } from "@/lib/navigation";
 
 interface AppSidebarUser {
@@ -52,6 +54,9 @@ function getInitials(name: string): string {
 export function AppSidebar({ user, navItems }: AppSidebarProps) {
   const pathname = usePathname();
   const setActiveNav = useUIStore((s) => s.setActiveNav);
+  const { resolvedTheme, setTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
+  const isMobile = useIsMobile();
 
   return (
     <Sidebar collapsible="icon">
@@ -64,7 +69,7 @@ export function AppSidebar({ user, navItems }: AppSidebarProps) {
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton
                     asChild
-                    isActive={pathname === item.href}
+                    isActive={pathname === item.href || pathname.startsWith(item.href + "/")}
                     tooltip={item.title}
                   >
                     <Link
@@ -115,7 +120,7 @@ export function AppSidebar({ user, navItems }: AppSidebarProps) {
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
-                side="right"
+                side={isMobile ? "top" : "right"}
                 align="end"
                 className="w-56"
               >
@@ -127,6 +132,11 @@ export function AppSidebar({ user, navItems }: AppSidebarProps) {
                     </p>
                   </div>
                 </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setTheme(isDark ? "light" : "dark")}>
+                  {isDark ? <Sun /> : <Moon />}
+                  {isDark ? "Light mode" : "Dark mode"}
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => signOut({ redirectTo: "/" }).catch(() => {})}
