@@ -6,7 +6,7 @@ import { toast } from "sonner";
 export function useFormDialog() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  async function submit<T>(
+  async function submit(
     action: () => Promise<boolean> | void,
     options?: { successMessage?: string; errorMessage?: string }
   ): Promise<boolean> {
