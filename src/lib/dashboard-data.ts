@@ -100,7 +100,7 @@ function computeTopicRadarData(
   solvedProblems: { problem: TopicStoreItem["problems"][number]; topicName: string }[]
 ): TopicRadarEntry[] {
   const topicSolveCount = new Map<string, number>();
-  for (const { problem, topicName } of solvedProblems) {
+  for (const { topicName } of solvedProblems) {
     topicSolveCount.set(topicName, (topicSolveCount.get(topicName) ?? 0) + 1);
   }
   return Array.from(topicSolveCount.entries())
