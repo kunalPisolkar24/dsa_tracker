@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import type { $Enums } from "@/generated/prisma/client";
 
 export interface ProblemScalarFields {
   id: string;
@@ -45,7 +46,7 @@ export async function createProblem(
       subTopicId: data.subTopicId ?? null,
       title: data.title,
       url: data.url ?? null,
-      difficulty: data.difficulty as any,
+      difficulty: data.difficulty as $Enums.Difficulty,
       notes: data.notes ?? null,
       sortOrder: maxOrder + 1,
     },
