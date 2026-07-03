@@ -1,8 +1,8 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { logger } from "@/lib/logger";
+import { logActivity } from "@/lib/services/activity-service";
 import type { ProblemStoreItem } from "@/types/topics";
 import type { CreateProblemInput, UpdateProblemInput } from "@/lib/schemas";
 import * as problemRepo from "@/lib/repositories/problem-repository";
@@ -96,30 +96,14 @@ export async function updateProblemStatus(
     const session = await auth();
     if (!session?.user?.id) return null;
 
-    const now = new Date();
-    const result = await prisma.$transaction(async (tx) => {
-      const problem = await tx.problem.update({
-        where: { id: problemId },
-        data: {
-          status,
-          ...(status === "SOLVED" ? { lastSolvedAt: now } : {}),
-        },
-      });
+    const now = status === "SOLVED" ? new Date() : null;
+    const problem = await problemRepo.updateProblemStatus(problemId, status, now);
 
-      if (status === "SOLVED") {
-        await tx.activityLog.create({
-          data: {
-            problemId,
-            userId: session.user.id,
-            activityType: "SOLVED",
-          },
-        });
-      }
+    if (status === "SOLVED") {
+      await logActivity(problemId, "SOLVED");
+    }
 
-      return problem;
-    });
-
-    return mapProblem(result);
+    return mapProblem(problem);
   } catch (error) {
     logger.error("Failed to update problem status", {
       problemId,
@@ -170,24 +154,11 @@ export async function updateProblemReviewCount(
     const session = await auth();
     if (!session?.user?.id) return null;
 
-    const result = await prisma.$transaction(async (tx) => {
-      const problem = await tx.problem.update({
-        where: { id: problemId },
-        data: { reviewCount, lastReviewedAt: new Date() },
-      });
+    const problem = await problemRepo.updateProblemReviewCount(problemId, reviewCount);
 
-      await tx.activityLog.create({
-        data: {
-          problemId,
-          userId: session.user.id,
-          activityType: "REVIEWED",
-        },
-      });
+    await logActivity(problemId, "REVIEWED");
 
-      return problem;
-    });
-
-    return mapProblem(result);
+    return mapProblem(problem);
   } catch (error) {
     logger.error("Failed to update problem review count", {
       problemId,
