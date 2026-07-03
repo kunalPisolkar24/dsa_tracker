@@ -150,12 +150,11 @@ export const RecentActivitySkeleton = memo(function RecentActivitySkeleton() {
         <Skeleton className="h-3 w-44" />
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px] text-sm">
+        <table className="w-full min-w-[500px] text-sm">
           <thead>
             <tr className="border-b border-border">
               <th className="px-4 py-3"><Skeleton className="h-3 w-4" /></th>
               <th className="px-4 py-3"><Skeleton className="h-3 w-14" /></th>
-              <th className="hidden px-4 py-3 sm:table-cell"><Skeleton className="h-3 w-10" /></th>
               <th className="px-4 py-3"><Skeleton className="h-3 w-14" /></th>
               <th className="px-4 py-3"><Skeleton className="h-3 w-12" /></th>
             </tr>
@@ -165,7 +164,6 @@ export const RecentActivitySkeleton = memo(function RecentActivitySkeleton() {
               <tr key={i} className="border-b border-border">
                 <td className="px-4 py-3"><Skeleton className="h-3 w-4" /></td>
                 <td className="px-4 py-3"><Skeleton className="h-3 w-32" /></td>
-                <td className="hidden px-4 py-3 sm:table-cell"><Skeleton className="h-5 w-16 rounded-full" /></td>
                 <td className="px-4 py-3"><Skeleton className="h-5 w-14 rounded-full" /></td>
                 <td className="px-4 py-3"><Skeleton className="h-3 w-16" /></td>
               </tr>

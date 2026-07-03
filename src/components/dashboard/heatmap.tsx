@@ -104,7 +104,7 @@ export function Heatmap({ data, streak, maxStreak }: HeatmapProps) {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>Contribution Heatmap</CardTitle>
+          <CardTitle>Solved in {selectedYear}</CardTitle>
           <CardDescription>Problems solved per day</CardDescription>
         </div>
         <Select value={selectedYear} onValueChange={setSelectedYear}>
@@ -178,7 +178,7 @@ export function Heatmap({ data, streak, maxStreak }: HeatmapProps) {
             </div>
           </div>
         </div>
-        <div className="mt-3 flex items-center justify-between gap-2 text-xs">
+        <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1 rounded-md border border-border bg-muted/50 px-2 py-0.5 text-foreground">
               <span className="leading-none">🔥</span>

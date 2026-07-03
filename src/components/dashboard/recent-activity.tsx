@@ -33,7 +33,7 @@ export function RecentActivity({ data }: RecentActivityProps) {
                 <th className="px-4 py-3 font-medium">Problem</th>
 
                 <th className="px-4 py-3 font-medium">Difficulty</th>
-                <th className="px-4 py-3 font-medium">Solved At</th>
+                <th className="whitespace-nowrap px-4 py-3 font-medium">Solved At</th>
               </tr>
             </thead>
             <tbody>
@@ -58,7 +58,7 @@ export function RecentActivity({ data }: RecentActivityProps) {
                       {DIFFICULTY_STYLES[entry.difficulty]?.label ?? entry.difficulty}
                     </Badge>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">
+                  <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
                     {timeAgo(entry.solvedAt)}
                   </td>
                 </tr>

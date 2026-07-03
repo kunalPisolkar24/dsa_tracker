@@ -40,18 +40,10 @@ export const ProblemRowSkeleton = memo(function ProblemRowSkeleton() {
       className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-sm"
       aria-hidden="true"
     >
-      <div className="flex shrink-0 flex-col gap-0.5">
-        <Skeleton className="size-5 rounded" />
-        <Skeleton className="size-5 rounded" />
-      </div>
       <Skeleton className="h-4 flex-1" />
       <Skeleton className="h-5 w-16 rounded-full" />
       <Skeleton className="h-5 w-14 rounded-full" />
       <Skeleton className="h-7 w-12 rounded-md" />
-      <div className="flex shrink-0 gap-0.5">
-        <Skeleton className="size-7 rounded-md" />
-        <Skeleton className="size-7 rounded-md" />
-      </div>
     </div>
   );
 });
@@ -66,10 +58,6 @@ export const SubtopicSectionSkeleton = memo(function SubtopicSectionSkeleton() {
             <Skeleton className="h-4 w-2/5" />
             <Skeleton className="h-3 w-3/5" />
           </div>
-        </div>
-        <div className="flex shrink-0 gap-0.5">
-          <Skeleton className="size-7 rounded-md" />
-          <Skeleton className="size-7 rounded-md" />
         </div>
       </div>
       <div className="space-y-1 pl-6">
