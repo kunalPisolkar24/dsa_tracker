@@ -11,9 +11,11 @@ import { useTopicStore } from "@/stores/topic-store";
 import {
   computeTopicCardViewModel,
   computeSubtopicViewModel,
+} from "@/lib/topic-view-models";
+import {
   computeBatchChanges,
   updateProblemInDraft,
-} from "@/lib/topic-utils";
+} from "@/lib/topic-diff";
 import type {
   SubTopicStoreItem,
   ProblemStoreItem,

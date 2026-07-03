@@ -18,7 +18,7 @@ import {
   createProblemService,
   updateProblemService,
   moveProblemInArray,
-} from "@/lib/topic-utils";
+} from "@/lib/topic-factories";
 import * as topicService from "@/lib/services/topic-service";
 import * as subTopicService from "@/lib/services/subtopic-service";
 import * as problemService from "@/lib/services/problem-service";
