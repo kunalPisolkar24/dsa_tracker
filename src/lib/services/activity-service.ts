@@ -3,6 +3,7 @@
 import { auth } from "@/lib/auth";
 import { logger } from "@/lib/logger";
 import { toDateStr } from "@/lib/date-utils";
+import { countConsecutiveDays } from "@/lib/streak-utils";
 import {
   createActivityLog,
   findRecentActivity,
@@ -26,27 +27,6 @@ export interface HeatmapEntry {
 export interface StreakData {
   streak: number;
   maxStreak: number;
-}
-
-function countConsecutiveDays(
-  dates: Date[],
-  from: Date,
-  direction: "backward" | "forward"
-): number {
-  let count = 0;
-  const dateSet = new Set(dates.map((d) => toDateStr(d)));
-  const current = new Date(from);
-  while (true) {
-    const key = toDateStr(current);
-    if (!dateSet.has(key)) break;
-    count++;
-    if (direction === "backward") {
-      current.setDate(current.getDate() - 1);
-    } else {
-      current.setDate(current.getDate() + 1);
-    }
-  }
-  return count;
 }
 
 export async function logActivity(
@@ -140,12 +120,13 @@ export async function getStreakData(): Promise<StreakData> {
 
     if (dates.length === 0) return { streak: 0, maxStreak: 0 };
 
-    const streak = countConsecutiveDays(dates, now, "backward");
+    const dateSet = new Set(dates.map((d) => toDateStr(d)));
+    const streak = countConsecutiveDays(dateSet, now, "backward");
 
     let maxStreak = 0;
     const current = new Date(since);
     while (current <= now) {
-      const s = countConsecutiveDays(dates, current, "forward");
+      const s = countConsecutiveDays(dateSet, current, "forward");
       if (s > maxStreak) maxStreak = s;
       current.setDate(current.getDate() + (s || 1));
     }

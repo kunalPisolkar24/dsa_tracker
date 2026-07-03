@@ -1,6 +1,7 @@
 import type { TopicStoreItem } from "@/types/topics";
 import { getAllProblems } from "@/lib/topic-utils";
 import { toDateStr } from "@/lib/date-utils";
+import { countConsecutiveDays } from "@/lib/streak-utils";
 
 export interface DifficultyStats {
   solved: number;
@@ -43,26 +44,6 @@ export interface DashboardData {
   reviewStats: { solved: number; markedForReview: number };
   heatmap: HeatmapEntry[];
   recentActivity: RecentActivityEntry[];
-}
-
-function countConsecutiveDays(
-  solveDates: Set<string>,
-  from: Date,
-  direction: "backward" | "forward"
-): number {
-  let count = 0;
-  const current = new Date(from);
-  while (true) {
-    const key = toDateStr(current);
-    if (!solveDates.has(key)) break;
-    count++;
-    if (direction === "backward") {
-      current.setDate(current.getDate() - 1);
-    } else {
-      current.setDate(current.getDate() + 1);
-    }
-  }
-  return count;
 }
 
 function flattenProblems(topics: TopicStoreItem[]): { problem: TopicStoreItem["problems"][number]; topicName: string }[] {

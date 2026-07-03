@@ -167,6 +167,7 @@ export async function reorderProblems(
         where: { id },
         data: { sortOrder: index },
       })
-    )
+    ),
+    { maxWait: 5000, timeout: 10000 }
   );
 }

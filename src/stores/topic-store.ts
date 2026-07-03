@@ -18,10 +18,11 @@ import {
   createProblemService,
   updateProblemService,
   moveProblemInArray,
-} from "@/lib/topic-utils";
+} from "@/lib/topic-factories";
 import * as topicService from "@/lib/services/topic-service";
 import * as subTopicService from "@/lib/services/subtopic-service";
 import * as problemService from "@/lib/services/problem-service";
+import { moveProblemBetweenContainers } from "@/lib/topic-diff";
 
 interface TopicStoreState {
   topics: TopicStoreItem[];
@@ -67,6 +68,108 @@ function findProblemContainer(
   }
 
   return null;
+}
+
+function mapProblemInContainers(
+  topics: TopicStoreItem[],
+  topicId: string,
+  problemId: string,
+  updater: (problem: ProblemStoreItem) => ProblemStoreItem
+): TopicStoreItem[] {
+  const container = findProblemContainer(topics, topicId, problemId);
+  if (!container) return topics;
+
+  return topics.map((t, ti) => {
+    if (ti !== container.topicIdx) return t;
+    if (container.subTopicIdx === null) {
+      return {
+        ...t,
+        problems: t.problems.map((p) =>
+          p.id === problemId ? updater(p) : p
+        ),
+      };
+    }
+    return {
+      ...t,
+      subtopics: t.subtopics.map((s, si) =>
+        si !== container.subTopicIdx
+          ? s
+          : { ...s, problems: s.problems.map((p) => p.id === problemId ? updater(p) : p) }
+      ),
+    };
+  });
+}
+
+function removeProblemFromContainers(
+  topics: TopicStoreItem[],
+  topicId: string,
+  problemId: string
+): TopicStoreItem[] {
+  const container = findProblemContainer(topics, topicId, problemId);
+  if (!container) return topics;
+
+  return topics.map((t, ti) => {
+    if (ti !== container.topicIdx) return t;
+    if (container.subTopicIdx === null) {
+      return {
+        ...t,
+        problems: t.problems.filter((p) => p.id !== problemId),
+      };
+    }
+    return {
+      ...t,
+      subtopics: t.subtopics.map((s, si) =>
+        si !== container.subTopicIdx
+          ? s
+          : { ...s, problems: s.problems.filter((p) => p.id !== problemId) }
+      ),
+    };
+  });
+}
+
+function createDebouncedProblemUpdate<T>(
+  set: (fn: ((state: TopicStoreState) => Partial<TopicStoreState>) | Partial<TopicStoreState>) => void,
+  get: () => TopicStoreState,
+  applyUpdate: (value: T) => (problem: ProblemStoreItem) => ProblemStoreItem,
+  persist: (problemId: string, value: T) => Promise<unknown>,
+  delay = 300
+): (topicId: string, problemId: string, value: T) => void {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  let pendingProblemId: string | null = null;
+  let pendingValue: T | null = null;
+  let snapshot: TopicStoreItem[] = [];
+
+  return (topicId, problemId, value) => {
+    if (timer === null) {
+      snapshot = get().topics;
+    }
+
+    set((state) => ({
+      topics: mapProblemInContainers(
+        state.topics,
+        topicId,
+        problemId,
+        applyUpdate(value)
+      ),
+    }));
+
+    pendingProblemId = problemId;
+    pendingValue = value;
+
+    if (timer !== null) clearTimeout(timer);
+
+    timer = setTimeout(async () => {
+      const id = pendingProblemId!;
+      const val = pendingValue!;
+      const snap = snapshot;
+      timer = null;
+      pendingProblemId = null;
+      pendingValue = null;
+
+      const result = await persist(id, val);
+      if (!result) set({ topics: snap });
+    }, delay);
+  };
 }
 
 export const useTopicStore = create<TopicStore>((set, get) => ({
@@ -273,107 +376,29 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
 
         if (oldProblem.subTopicId === input.subTopicId) {
           return {
-            topics: state.topics.map((t, ti) => {
-              if (ti !== topicIdx) return t;
-              if (subTopicIdx === null) {
-                return {
-                  ...t,
-                  problems: t.problems.map((p) =>
-                    p.id === problemId ? updateProblemService(p, input) : p
-                  ),
-                };
-              }
-              return {
-                ...t,
-                subtopics: t.subtopics.map((s, si) =>
-                  si !== subTopicIdx
-                    ? s
-                    : {
-                        ...s,
-                        problems: s.problems.map((p) =>
-                          p.id === problemId ? updateProblemService(p, input) : p
-                        ),
-                      }
-                ),
-              };
-            }),
+            topics: mapProblemInContainers(
+              state.topics, topicId, problemId,
+              (p) => updateProblemService(p, input)
+            ),
           };
         }
 
         const updatedProblem = updateProblemService(oldProblem, input);
 
         return {
-          topics: state.topics.map((t, ti) => {
-            if (ti !== topicIdx) return t;
-
-            let updatedTopic = t;
-
-            if (subTopicIdx === null) {
-              updatedTopic = {
-                ...updatedTopic,
-                problems: updatedTopic.problems.filter((p) => p.id !== problemId),
-              };
-            } else {
-              updatedTopic = {
-                ...updatedTopic,
-                subtopics: updatedTopic.subtopics.map((s, si) =>
-                  si !== subTopicIdx
-                    ? s
-                    : { ...s, problems: s.problems.filter((p) => p.id !== problemId) }
-                ),
-              };
-            }
-
-            if (input.subTopicId === null) {
-              return {
-                ...updatedTopic,
-                problems: [...updatedTopic.problems, updatedProblem],
-              };
-            }
-
-            return {
-              ...updatedTopic,
-              subtopics: updatedTopic.subtopics.map((s) =>
-                s.id !== input.subTopicId
-                  ? s
-                  : { ...s, problems: [...s.problems, updatedProblem] }
-              ),
-            };
-          }),
+          topics: moveProblemBetweenContainers(
+            state.topics, topicIdx, problemId,
+            subTopicIdx, input.subTopicId!, updatedProblem
+          ),
         };
       });
     } else {
-      set((state) => {
-        const container = findProblemContainer(state.topics, topicId, problemId);
-        if (!container) return state;
-
-        return {
-          topics: state.topics.map((t, ti) => {
-            if (ti !== container.topicIdx) return t;
-            if (container.subTopicIdx === null) {
-              return {
-                ...t,
-                problems: t.problems.map((p) =>
-                  p.id === problemId ? updateProblemService(p, input) : p
-                ),
-              };
-            }
-            return {
-              ...t,
-              subtopics: t.subtopics.map((s, si) =>
-                si !== container.subTopicIdx
-                  ? s
-                  : {
-                      ...s,
-                      problems: s.problems.map((p) =>
-                        p.id === problemId ? updateProblemService(p, input) : p
-                      ),
-                    }
-              ),
-            };
-          }),
-        };
-      });
+      set((state) => ({
+        topics: mapProblemInContainers(
+          state.topics, topicId, problemId,
+          (p) => updateProblemService(p, input)
+        ),
+      }));
     }
 
     problemService.updateProblem(problemId, input).then((dbProblem) => {
@@ -383,174 +408,29 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
 
   removeProblem: (topicId, problemId) => {
     const snapshot = get().topics;
-    set((state) => {
-      const container = findProblemContainer(state.topics, topicId, problemId);
-      if (!container) return state;
-
-      return {
-        topics: state.topics.map((t, ti) => {
-          if (ti !== container.topicIdx) return t;
-          if (container.subTopicIdx === null) {
-            return {
-              ...t,
-              problems: t.problems.filter((p) => p.id !== problemId),
-            };
-          }
-          return {
-            ...t,
-            subtopics: t.subtopics.map((s, si) =>
-              si !== container.subTopicIdx
-                ? s
-                : { ...s, problems: s.problems.filter((p) => p.id !== problemId) }
-            ),
-          };
-        }),
-      };
-    });
+    set((state) => ({
+      topics: removeProblemFromContainers(state.topics, topicId, problemId),
+    }));
     problemService.deleteProblem(problemId).then((success) => {
       if (!success) set({ topics: snapshot });
     });
   },
 
-  updateProblemStatus: (() => {
-    let timer: ReturnType<typeof setTimeout> | null = null;
-    let pendingProblemId: string | null = null;
-    let pendingStatus: ProblemStoreItem["status"] | null = null;
-    let snapshot: TopicStoreItem[] = [];
+  updateProblemStatus: createDebouncedProblemUpdate(
+    set, get,
+    (status) => (p) => ({
+      ...p,
+      status,
+      ...(status === "SOLVED" ? { solvedAt: new Date().toISOString() } : {}),
+    }),
+    (id, status) => problemService.updateProblemStatus(id, status),
+  ),
 
-    return (topicId: string, problemId: string, status: ProblemStoreItem["status"]) => {
-      if (timer === null) {
-        snapshot = get().topics;
-      }
-
-      set((state) => {
-        const container = findProblemContainer(state.topics, topicId, problemId);
-        if (!container) return state;
-
-        return {
-          topics: state.topics.map((t, ti) => {
-            if (ti !== container.topicIdx) return t;
-            if (container.subTopicIdx === null) {
-              return {
-                ...t,
-                problems: t.problems.map((p) =>
-                  p.id === problemId
-                    ? {
-                        ...p,
-                        status,
-                        ...(status === "SOLVED" ? { solvedAt: new Date().toISOString() } : {}),
-                      }
-                    : p
-                ),
-              };
-            }
-            return {
-              ...t,
-              subtopics: t.subtopics.map((s, si) =>
-                si !== container.subTopicIdx
-                  ? s
-                  : {
-                      ...s,
-                      problems: s.problems.map((p) =>
-                        p.id === problemId
-                          ? {
-                              ...p,
-                              status,
-                              ...(status === "SOLVED" ? { solvedAt: new Date().toISOString() } : {}),
-                            }
-                          : p
-                      ),
-                    }
-              ),
-            };
-          }),
-        };
-      });
-
-      pendingProblemId = problemId;
-      pendingStatus = status;
-
-      if (timer !== null) {
-        clearTimeout(timer);
-      }
-
-      timer = setTimeout(async () => {
-        const id = pendingProblemId!;
-        const st = pendingStatus!;
-        const snap = snapshot;
-        timer = null;
-        pendingProblemId = null;
-        pendingStatus = null;
-
-        const result = await problemService.updateProblemStatus(id, st);
-        if (!result) set({ topics: snap });
-      }, 300);
-    };
-  })(),
-
-  updateProblemReviewCount: (() => {
-    let timer: ReturnType<typeof setTimeout> | null = null;
-    let pendingProblemId: string | null = null;
-    let pendingReviewCount: number | null = null;
-    let snapshot: TopicStoreItem[] = [];
-
-    return (topicId: string, problemId: string, reviewCount: number) => {
-      if (timer === null) {
-        snapshot = get().topics;
-      }
-
-      set((state) => {
-        const container = findProblemContainer(state.topics, topicId, problemId);
-        if (!container) return state;
-
-        return {
-          topics: state.topics.map((t, ti) => {
-            if (ti !== container.topicIdx) return t;
-            if (container.subTopicIdx === null) {
-              return {
-                ...t,
-                problems: t.problems.map((p) =>
-                  p.id === problemId ? { ...p, reviewCount } : p
-                ),
-              };
-            }
-            return {
-              ...t,
-              subtopics: t.subtopics.map((s, si) =>
-                si !== container.subTopicIdx
-                  ? s
-                  : {
-                      ...s,
-                      problems: s.problems.map((p) =>
-                        p.id === problemId ? { ...p, reviewCount } : p
-                      ),
-                    }
-              ),
-            };
-          }),
-        };
-      });
-
-      pendingProblemId = problemId;
-      pendingReviewCount = reviewCount;
-
-      if (timer !== null) {
-        clearTimeout(timer);
-      }
-
-      timer = setTimeout(async () => {
-        const id = pendingProblemId!;
-        const count = pendingReviewCount!;
-        const snap = snapshot;
-        timer = null;
-        pendingProblemId = null;
-        pendingReviewCount = null;
-
-        const result = await problemService.updateProblemReviewCount(id, count);
-        if (!result) set({ topics: snap });
-      }, 300);
-    };
-  })(),
+  updateProblemReviewCount: createDebouncedProblemUpdate(
+    set, get,
+    (reviewCount) => (p) => ({ ...p, reviewCount }),
+    (id, reviewCount) => problemService.updateProblemReviewCount(id, reviewCount),
+  ),
 
   moveProblem: (() => {
     let reorderTimer: ReturnType<typeof setTimeout> | null = null;

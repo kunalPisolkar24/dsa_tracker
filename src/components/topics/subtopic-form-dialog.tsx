@@ -14,9 +14,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
 import { z } from "zod";
 import { createSubTopicSchema, updateSubTopicSchema } from "@/lib/schemas";
+import { useFormDialog } from "@/components/topics/use-form-dialog";
 
 const createSubTopicFormSchema = z.object({
   name: createSubTopicSchema.shape.name,
@@ -44,7 +44,7 @@ export function SubtopicFormDialog({
   const [name, setName] = useState(initialValues?.name ?? "");
   const [description, setDescription] = useState(initialValues?.description ?? "");
   const [errors, setErrors] = useState<{ name?: string }>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isSubmitting, submit } = useFormDialog();
 
   const isEdit = mode === "edit";
 
@@ -62,33 +62,25 @@ export function SubtopicFormDialog({
       }
       return;
     }
-    setIsSubmitting(true);
-    try {
-      if (isEdit) {
-        onSubmit({
-          name: result.data.name ?? name.trim(),
-          description: result.data.description ?? (description.trim() || undefined),
-        });
+
+    const values = {
+      name: result.data.name ?? name.trim(),
+      description: result.data.description ?? (description.trim() || undefined),
+    };
+
+    if (isEdit) {
+      onSubmit(values);
+      onOpenChange(false);
+    } else {
+      const ok = await submit(
+        () => onSubmit(values),
+        { errorMessage: "Failed to create sub-topic" }
+      );
+      if (ok) {
+        setName("");
+        setDescription("");
         onOpenChange(false);
-      } else {
-        const success = await onSubmit({
-          name: result.data.name ?? name.trim(),
-          description: result.data.description ?? (description.trim() || undefined),
-        });
-        if (success) {
-          setName("");
-          setDescription("");
-          onOpenChange(false);
-        } else {
-          toast.error("Failed to create sub-topic");
-        }
       }
-    } catch {
-      if (!isEdit) {
-        toast.error("An unexpected error occurred");
-      }
-    } finally {
-      setIsSubmitting(false);
     }
   }
 

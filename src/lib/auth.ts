@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma"
 import { verifyPassword } from "@/lib/password"
 import { upsertGoogleUser } from "@/lib/user-service"
 import { logger } from "@/lib/logger"
+import { AUTH_PAGES } from "@/lib/routes"
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
   providers: [
@@ -51,6 +52,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     },
   },
   pages: {
-    signIn: "/login",
+    signIn: AUTH_PAGES[0],
   },
 })
