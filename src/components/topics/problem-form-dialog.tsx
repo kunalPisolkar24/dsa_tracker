@@ -21,9 +21,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
 import { z } from "zod";
 import { createProblemSchema, updateProblemSchema } from "@/lib/schemas";
+import { useFormDialog } from "@/components/topics/use-form-dialog";
 import type { SubTopicStoreItem } from "@/types/topics";
 
 const createProblemFormSchema = z.object({
@@ -79,7 +79,7 @@ export function ProblemFormDialog({
   );
   const [notes, setNotes] = useState(initialValues?.notes ?? "");
   const [errors, setErrors] = useState<{ title?: string; url?: string }>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isSubmitting, submit } = useFormDialog();
 
   const isEdit = mode === "edit";
 
@@ -103,42 +103,31 @@ export function ProblemFormDialog({
       }
       return;
     }
-    setIsSubmitting(true);
-    try {
-      if (isEdit) {
-        onSubmit({
-          title: title.trim(),
-          url: url.trim() || undefined,
-          difficulty,
-          subTopicId: subTopicId || null,
-          notes: notes.trim() || undefined,
-        });
+
+    const values = {
+      title: title.trim(),
+      url: url.trim() || undefined,
+      difficulty,
+      subTopicId: subTopicId || null,
+      notes: notes.trim() || undefined,
+    };
+
+    if (isEdit) {
+      onSubmit(values);
+      onOpenChange(false);
+    } else {
+      const ok = await submit(
+        () => onSubmit(values),
+        { errorMessage: "Failed to create problem" }
+      );
+      if (ok) {
+        setTitle("");
+        setUrl("");
+        setDifficulty("EASY");
+        setSubTopicId(null);
+        setNotes("");
         onOpenChange(false);
-      } else {
-        const success = await onSubmit({
-          title: title.trim(),
-          url: url.trim() || undefined,
-          difficulty,
-          subTopicId: subTopicId || null,
-          notes: notes.trim() || undefined,
-        });
-        if (success) {
-          setTitle("");
-          setUrl("");
-          setDifficulty("EASY");
-          setSubTopicId(null);
-          setNotes("");
-          onOpenChange(false);
-        } else {
-          toast.error("Failed to create problem");
-        }
       }
-    } catch {
-      if (!isEdit) {
-        toast.error("An unexpected error occurred");
-      }
-    } finally {
-      setIsSubmitting(false);
     }
   }
 
