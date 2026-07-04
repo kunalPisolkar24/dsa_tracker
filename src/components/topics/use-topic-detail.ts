@@ -343,26 +343,62 @@ export function useTopicDetail(topicId: string) {
   ) {
     setDraft((prev) => {
       if (!prev) return prev;
-      const updateInList = (problems: ProblemStoreItem[]) =>
-        problems.map((p) =>
-          p.id === problemId
-            ? {
-                ...p,
-                title: input.title,
-                url: input.url,
-                difficulty: input.difficulty,
-                subTopicId: input.subTopicId ?? null,
-                notes: input.notes,
-              }
-            : p
-        );
-      return {
+
+      const directIdx = prev.problems.findIndex((p) => p.id === problemId);
+      const subTopicIdx = directIdx === -1
+        ? prev.subtopics.findIndex((st) => st.problems.some((p) => p.id === problemId))
+        : -1;
+      if (directIdx === -1 && subTopicIdx === -1) return prev;
+
+      const currentProblem = directIdx !== -1
+        ? prev.problems[directIdx]
+        : prev.subtopics[subTopicIdx].problems.find((p) => p.id === problemId)!;
+
+      const newSubTopicId = input.subTopicId ?? null;
+      const subTopicChanged = currentProblem.subTopicId !== newSubTopicId;
+
+      const updatedProblem: ProblemStoreItem = {
+        ...currentProblem,
+        title: input.title,
+        url: input.url,
+        difficulty: input.difficulty,
+        subTopicId: newSubTopicId,
+        notes: input.notes,
+      };
+
+      if (!subTopicChanged) {
+        const updateInList = (problems: ProblemStoreItem[]) =>
+          problems.map((p) => (p.id === problemId ? updatedProblem : p));
+        return {
+          ...prev,
+          problems: updateInList(prev.problems),
+          subtopics: prev.subtopics.map((st) => ({
+            ...st,
+            problems: updateInList(st.problems),
+          })),
+        };
+      }
+
+      const afterRemove = {
         ...prev,
-        problems: updateInList(prev.problems),
+        problems: prev.problems.filter((p) => p.id !== problemId),
         subtopics: prev.subtopics.map((st) => ({
           ...st,
-          problems: updateInList(st.problems),
+          problems: st.problems.filter((p) => p.id !== problemId),
         })),
+      };
+
+      if (newSubTopicId === null) {
+        return { ...afterRemove, problems: [...afterRemove.problems, updatedProblem] };
+      }
+
+      return {
+        ...afterRemove,
+        subtopics: afterRemove.subtopics.map((st) =>
+          st.id === newSubTopicId
+            ? { ...st, problems: [...st.problems, updatedProblem] }
+            : st
+        ),
       };
     });
     setHasChanges(true);
