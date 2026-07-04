@@ -33,9 +33,9 @@ export function NotesDialog({
         </DialogHeader>
         <Textarea
           value={notes}
-          disabled
+          readOnly
           rows={6}
-          className="min-h-[120px] resize-none"
+          className="min-h-[120px] resize-none cursor-default bg-muted/30 text-foreground focus-visible:ring-0 focus-visible:border-input"
         />
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
