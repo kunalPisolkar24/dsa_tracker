@@ -27,6 +27,7 @@ type DialogState =
   | { type: "editSubTopic"; target: SubTopicStoreItem }
   | { type: "createProblem"; subTopicId?: string }
   | { type: "editProblem"; target: ProblemStoreItem }
+  | { type: "notes"; target: ProblemStoreItem }
   | { type: "delete"; entityType: "subtopic" | "problem"; target: { id: string; name: string } };
 
 export function useTopicDetail(topicId: string) {
