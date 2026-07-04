@@ -46,6 +46,8 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
     handleProblemReviewCountChange,
     handleProblemMoveUp,
     handleProblemMoveDown,
+    handleSubTopicMoveUp,
+    handleSubTopicMoveDown,
     handleEnterEditMode,
     handleCancelEdit,
     handleDiscardChanges,
@@ -151,7 +153,7 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
 
       <div className="flex-1 space-y-8">
         {hasSubtopics &&
-          displayTopic!.subtopics.map((subtopic) => {
+          displayTopic!.subtopics.map((subtopic, idx) => {
             const vm = subtopicViewModels.find((v) => v.id === subtopic.id);
             if (!vm) return null;
             return (
@@ -160,6 +162,10 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
                 subtopic={subtopic}
                 viewModel={vm}
                 isEditing={isEditing}
+                isFirst={idx === 0}
+                isLast={idx === displayTopic!.subtopics.length - 1}
+                onMoveUp={handleSubTopicMoveUp}
+                onMoveDown={handleSubTopicMoveDown}
                 onEdit={(st) => setDialog({ type: "editSubTopic", target: st })}
                 onDelete={(st) =>
                   setDialog({

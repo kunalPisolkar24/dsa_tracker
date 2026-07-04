@@ -32,6 +32,7 @@ export interface BatchChanges {
   problemUpdates: Array<{ id: string; input: UpdateProblemInput }>;
   problemDeletes: string[];
   problemReorders: string[][];
+  subtopicReorders: string[][];
   hasAny: boolean;
 }
 
@@ -91,6 +92,7 @@ export function computeBatchChanges(
   const problemUpdates: BatchChanges["problemUpdates"] = [];
   const problemDeletes: BatchChanges["problemDeletes"] = [];
   const problemReorders: BatchChanges["problemReorders"] = [];
+  const subtopicReorders: BatchChanges["subtopicReorders"] = [];
 
   for (const origSt of original.subtopics) {
     if (!draft.subtopics.find((s) => s.id === origSt.id)) {
@@ -156,12 +158,22 @@ export function computeBatchChanges(
     }
   }
 
+  const origSubTopicIds = original.subtopics.map((s) => s.id);
+  const draftSubTopicIds = draft.subtopics.map((s) => s.id);
+  const subTopicOrderChanged =
+    origSubTopicIds.length !== draftSubTopicIds.length ||
+    origSubTopicIds.some((id, i) => id !== draftSubTopicIds[i]);
+  if (subTopicOrderChanged && draftSubTopicIds.length > 0) {
+    subtopicReorders.push(draftSubTopicIds);
+  }
+
   const hasAny =
     subtopicUpdates.length > 0 ||
     subtopicDeletes.length > 0 ||
     problemUpdates.length > 0 ||
     problemDeletes.length > 0 ||
-    problemReorders.length > 0;
+    problemReorders.length > 0 ||
+    subtopicReorders.length > 0;
 
   return {
     subtopicUpdates,
@@ -169,6 +181,7 @@ export function computeBatchChanges(
     problemUpdates,
     problemDeletes,
     problemReorders,
+    subtopicReorders,
     hasAny,
   };
 }

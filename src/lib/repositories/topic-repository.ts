@@ -3,6 +3,7 @@ import type { Prisma } from "@/generated/prisma/client";
 
 export const topicInclude = {
   subTopics: {
+    orderBy: { sortOrder: "asc" },
     include: { problems: { orderBy: { sortOrder: "asc" } } },
   },
   problems: {

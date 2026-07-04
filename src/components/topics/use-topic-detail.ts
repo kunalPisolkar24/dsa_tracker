@@ -11,6 +11,7 @@ import {
   computeBatchChanges,
   updateProblemInDraft,
 } from "@/lib/topic-diff";
+import { moveSubTopicInArray } from "@/lib/topic-factories";
 import type {
   SubTopicStoreItem,
   ProblemStoreItem,
@@ -196,6 +197,18 @@ export function useTopicDetail(topicId: string) {
     moveProblem(topicId, problemId, "down");
   }
 
+  function handleSubTopicMoveUp(subTopicId: string) {
+    if (isEditing) {
+      moveSubTopicInDraft(subTopicId, "up");
+    }
+  }
+
+  function handleSubTopicMoveDown(subTopicId: string) {
+    if (isEditing) {
+      moveSubTopicInDraft(subTopicId, "down");
+    }
+  }
+
   function handleEnterEditMode() {
     if (!topic) return;
     setDraft(structuredClone(topic));
@@ -259,6 +272,13 @@ export function useTopicDetail(topicId: string) {
         }
       }
 
+      for (const ids of changes.subtopicReorders) {
+        const result = await subTopicService.reorderSubtopics(topicId, ids);
+        if (result === null || result === false) {
+          allOk = false;
+        }
+      }
+
       const dbTopics = await topicService.getTopics();
       const updatedTopic = dbTopics.find((t: TopicStoreItem) => t.id === topicId);
       if (updatedTopic) {
@@ -311,6 +331,17 @@ export function useTopicDetail(topicId: string) {
         }
       }
       return prev;
+    });
+    setHasChanges(true);
+  }
+
+  function moveSubTopicInDraft(subTopicId: string, direction: "up" | "down") {
+    setDraft((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        subtopics: moveSubTopicInArray(prev.subtopics, subTopicId, direction),
+      };
     });
     setHasChanges(true);
   }
@@ -431,6 +462,8 @@ export function useTopicDetail(topicId: string) {
     handleProblemReviewCountChange,
     handleProblemMoveUp,
     handleProblemMoveDown,
+    handleSubTopicMoveUp,
+    handleSubTopicMoveDown,
     handleEnterEditMode,
     handleCancelEdit,
     handleDiscardChanges,

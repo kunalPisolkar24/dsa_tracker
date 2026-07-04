@@ -10,6 +10,7 @@ export const seedTopics: TopicStoreItem[] = [
         id: "seed-prefix-sum",
         name: "Prefix Sum",
         description: "Cumulative sum techniques for range queries and subarray sums.",
+        sortOrder: 0,
         problems: [
           { id: "sp-ps-1", title: "Range Sum Query - Immutable", url: "https://leetcode.com/problems/range-sum-query-immutable/", difficulty: "EASY", status: "SOLVED", reviewCount: 0, sortOrder: 0, solvedAt: "2026-06-29T09:15:00Z" },
           { id: "sp-ps-2", title: "Contiguous Array", url: "https://leetcode.com/problems/contiguous-array/", difficulty: "MEDIUM", status: "SOLVED", reviewCount: 0, sortOrder: 0, solvedAt: "2026-06-27T14:30:00Z" },
@@ -21,6 +22,7 @@ export const seedTopics: TopicStoreItem[] = [
         id: "seed-sliding-window",
         name: "Sliding Window",
         description: "Fixed and variable window patterns for subarray and substring problems.",
+        sortOrder: 0,
         problems: [
           { id: "sp-sw-1", title: "Maximum Average Subarray I", url: "https://leetcode.com/problems/maximum-average-subarray-i/", difficulty: "EASY", status: "SOLVED", reviewCount: 0, sortOrder: 0, solvedAt: "2026-06-25T11:00:00Z" },
           { id: "sp-sw-2", title: "Longest Substring Without Repeating Characters", url: "https://leetcode.com/problems/longest-substring-without-repeating-characters/", difficulty: "MEDIUM", status: "SOLVED", reviewCount: 0, sortOrder: 0, solvedAt: "2026-06-22T16:45:00Z" },
@@ -48,6 +50,7 @@ export const seedTopics: TopicStoreItem[] = [
         id: "seed-interval",
         name: "Interval Problems",
         description: "Merging, inserting, and intersecting intervals.",
+        sortOrder: 0,
         problems: [
           { id: "sp-tp-int-1", title: "Merge Intervals", url: "https://leetcode.com/problems/merge-intervals/", difficulty: "MEDIUM", status: "SOLVED", reviewCount: 0, sortOrder: 0, solvedAt: "2026-06-20T09:00:00Z" },
           { id: "sp-tp-int-2", title: "Insert Interval", url: "https://leetcode.com/problems/insert-interval/", difficulty: "MEDIUM", status: "SOLVED", reviewCount: 0, sortOrder: 0, solvedAt: "2026-06-18T15:20:00Z" },
@@ -60,6 +63,7 @@ export const seedTopics: TopicStoreItem[] = [
         id: "seed-fast-slow",
         name: "Fast & Slow Pointers",
         description: "Cycle detection and middle element finding using two-speed pointers.",
+        sortOrder: 0,
         problems: [
           { id: "sp-tp-fs-1", title: "Linked List Cycle", url: "https://leetcode.com/problems/linked-list-cycle/", difficulty: "EASY", status: "SOLVED", reviewCount: 0, sortOrder: 0, solvedAt: "2026-06-15T10:00:00Z" },
           { id: "sp-tp-fs-2", title: "Happy Number", url: "https://leetcode.com/problems/happy-number/", difficulty: "EASY", status: "ATTEMPTED", reviewCount: 0, sortOrder: 0 },
@@ -84,6 +88,7 @@ export const seedTopics: TopicStoreItem[] = [
         id: "seed-monotonic-stack",
         name: "Monotonic Stack",
         description: "Maintaining increasing or decreasing stack order for nearest element problems.",
+        sortOrder: 0,
         problems: [
           { id: "sp-sq-ms-1", title: "Daily Temperatures", url: "https://leetcode.com/problems/daily-temperatures/", difficulty: "MEDIUM", status: "SOLVED", reviewCount: 0, sortOrder: 0, solvedAt: "2026-06-08T11:00:00Z" },
           { id: "sp-sq-ms-2", title: "Next Greater Element I", url: "https://leetcode.com/problems/next-greater-element-i/", difficulty: "EASY", status: "SOLVED", reviewCount: 0, sortOrder: 0, solvedAt: "2026-06-05T14:00:00Z" },
@@ -109,6 +114,7 @@ export const seedTopics: TopicStoreItem[] = [
         id: "seed-ll-reversal",
         name: "Linked List Reversal",
         description: "Techniques for reversing linked lists and sublists.",
+        sortOrder: 0,
         problems: [
           { id: "sp-ll-rv-1", title: "Reverse Linked List", url: "https://leetcode.com/problems/reverse-linked-list/", difficulty: "EASY", status: "SOLVED", reviewCount: 0, sortOrder: 0, solvedAt: "2026-05-29T10:00:00Z" },
           { id: "sp-ll-rv-2", title: "Reverse Linked List II", url: "https://leetcode.com/problems/reverse-linked-list-ii/", difficulty: "MEDIUM", status: "SOLVED", reviewCount: 0, sortOrder: 0, solvedAt: "2026-05-26T13:00:00Z" },
@@ -120,6 +126,7 @@ export const seedTopics: TopicStoreItem[] = [
         id: "seed-ll-fast-slow",
         name: "Fast & Slow (LL)",
         description: "Cycle detection, middle finding, and intersection in linked lists.",
+        sortOrder: 0,
         problems: [
           { id: "sp-ll-fl-1", title: "Middle of the Linked List", url: "https://leetcode.com/problems/middle-of-the-linked-list/", difficulty: "EASY", status: "SOLVED", reviewCount: 0, sortOrder: 0, solvedAt: "2026-05-23T11:00:00Z" },
           { id: "sp-ll-fl-2", title: "Linked List Cycle II", url: "https://leetcode.com/problems/linked-list-cycle-ii/", difficulty: "MEDIUM", status: "MARKED_FOR_REVIEW", reviewCount: 1, sortOrder: 0 },
@@ -144,6 +151,7 @@ export const seedTopics: TopicStoreItem[] = [
         id: "seed-bst",
         name: "Binary Search Trees",
         description: "BST properties, validation, and search operations.",
+        sortOrder: 0,
         problems: [
           { id: "sp-tr-bst-1", title: "Validate Binary Search Tree", url: "https://leetcode.com/problems/validate-binary-search-tree/", difficulty: "MEDIUM", status: "SOLVED", reviewCount: 0, sortOrder: 0, solvedAt: "2026-05-11T10:00:00Z" },
           { id: "sp-tr-bst-2", title: "Lowest Common Ancestor of a BST", url: "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/", difficulty: "MEDIUM", status: "SOLVED", reviewCount: 0, sortOrder: 0, solvedAt: "2026-05-08T12:00:00Z" },
@@ -156,6 +164,7 @@ export const seedTopics: TopicStoreItem[] = [
         id: "seed-traversals",
         name: "Tree Traversals",
         description: "In-order, pre-order, post-order, and level-order traversal techniques.",
+        sortOrder: 0,
         problems: [
           { id: "sp-tr-tv-1", title: "Binary Tree Inorder Traversal", url: "https://leetcode.com/problems/binary-tree-inorder-traversal/", difficulty: "EASY", status: "SOLVED", reviewCount: 0, sortOrder: 0, solvedAt: "2026-05-05T16:00:00Z" },
           { id: "sp-tr-tv-2", title: "Binary Tree Level Order Traversal", url: "https://leetcode.com/problems/binary-tree-level-order-traversal/", difficulty: "MEDIUM", status: "SOLVED", reviewCount: 0, sortOrder: 0, solvedAt: "2026-05-02T09:00:00Z" },
@@ -167,6 +176,7 @@ export const seedTopics: TopicStoreItem[] = [
         id: "seed-bfs-dfs",
         name: "BFS & DFS",
         description: "Breadth-first and depth-first search on trees for path and property problems.",
+        sortOrder: 0,
         problems: [
           { id: "sp-tr-bd-1", title: "Maximum Depth of Binary Tree", url: "https://leetcode.com/problems/maximum-depth-of-binary-tree/", difficulty: "EASY", status: "SOLVED", reviewCount: 0, sortOrder: 0, solvedAt: "2026-04-29T14:00:00Z" },
           { id: "sp-tr-bd-2", title: "Diameter of Binary Tree", url: "https://leetcode.com/problems/diameter-of-binary-tree/", difficulty: "EASY", status: "SOLVED", reviewCount: 0, sortOrder: 0, solvedAt: "2026-04-26T11:00:00Z" },
@@ -192,6 +202,7 @@ export const seedTopics: TopicStoreItem[] = [
         id: "seed-1d-dp",
         name: "1D DP",
         description: "Linear recurrence relations for sequence-based problems.",
+        sortOrder: 0,
         problems: [
           { id: "sp-dp-1d-1", title: "Climbing Stairs", url: "https://leetcode.com/problems/climbing-stairs/", difficulty: "EASY", status: "SOLVED", reviewCount: 0, sortOrder: 0, solvedAt: "2026-04-17T13:00:00Z" },
           { id: "sp-dp-1d-2", title: "House Robber", url: "https://leetcode.com/problems/house-robber/", difficulty: "MEDIUM", status: "SOLVED", reviewCount: 0, sortOrder: 0, solvedAt: "2026-04-14T15:00:00Z" },
@@ -205,6 +216,7 @@ export const seedTopics: TopicStoreItem[] = [
         id: "seed-0-1-knap",
         name: "0/1 Knapsack",
         description: "Subset selection with capacity constraints.",
+        sortOrder: 0,
         problems: [
           { id: "sp-dp-kp-1", title: "Partition Equal Subset Sum", url: "https://leetcode.com/problems/partition-equal-subset-sum/", difficulty: "MEDIUM", status: "SOLVED", reviewCount: 0, sortOrder: 0, solvedAt: "2026-04-11T09:00:00Z" },
           { id: "sp-dp-kp-2", title: "Target Sum", url: "https://leetcode.com/problems/target-sum/", difficulty: "MEDIUM", status: "ATTEMPTED", reviewCount: 0, sortOrder: 0 },
@@ -215,6 +227,7 @@ export const seedTopics: TopicStoreItem[] = [
         id: "seed-lcs",
         name: "Longest Common Subsequence",
         description: "String alignment and sequence comparison using 2D DP.",
+        sortOrder: 0,
         problems: [
           { id: "sp-dp-lcs-1", title: "Longest Common Subsequence", url: "https://leetcode.com/problems/longest-common-subsequence/", difficulty: "MEDIUM", status: "SOLVED", reviewCount: 0, sortOrder: 0, solvedAt: "2026-04-08T16:00:00Z" },
           { id: "sp-dp-lcs-2", title: "Edit Distance", url: "https://leetcode.com/problems/edit-distance/", difficulty: "MEDIUM", status: "ATTEMPTED", reviewCount: 0, sortOrder: 0 },
