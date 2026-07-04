@@ -237,7 +237,8 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
 
   addSubTopic: async (topicId, input) => {
     const snapshot = get().topics;
-    const newSubTopic = createSubTopicService({ ...input, topicId });
+    const topic = get().topics.find((t) => t.id === topicId);
+    const newSubTopic = createSubTopicService({ ...input, topicId }, topic?.subtopics);
     set((state) => ({
       topics: state.topics.map((t) =>
         t.id === topicId

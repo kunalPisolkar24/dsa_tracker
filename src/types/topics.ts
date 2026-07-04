@@ -10,6 +10,7 @@ export interface SubTopicStoreItem {
   id: string;
   name: string;
   description?: string;
+  sortOrder: number;
   problems: ProblemStoreItem[];
 }
 

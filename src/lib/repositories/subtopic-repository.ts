@@ -34,3 +34,20 @@ export async function updateSubTopic(
 export async function deleteSubTopic(id: string): Promise<void> {
   await prisma.subTopic.delete({ where: { id } });
 }
+
+export async function reorderSubtopics(
+  topicId: string,
+  subTopicIds: string[]
+): Promise<void> {
+  if (subTopicIds.length === 0) return;
+
+  await prisma.$transaction(
+    subTopicIds.map((id, index) =>
+      prisma.subTopic.update({
+        where: { id },
+        data: { sortOrder: index },
+      })
+    ),
+    { maxWait: 5000, timeout: 10000 }
+  );
+}

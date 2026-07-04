@@ -56,6 +56,7 @@ model SubTopic {
   topicId     String   @map("topic_id")
   name        String
   description String?
+  sortOrder   Int      @default(0) @map("sort_order")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 

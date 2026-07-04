@@ -38,6 +38,7 @@ export function mapPrismaTopic(t: {
     id: string;
     name: string;
     description: string | null;
+    sortOrder: number;
     problems: Array<{
       id: string;
       title: string;
@@ -72,6 +73,7 @@ export function mapPrismaTopic(t: {
       id: st.id,
       name: st.name,
       description: st.description ?? undefined,
+      sortOrder: st.sortOrder,
       problems: st.problems.map(mapPrismaProblem),
     })),
     problems: t.problems.map(mapPrismaProblem),
@@ -82,6 +84,7 @@ export function mapPrismaSubTopic(st: {
   id: string;
   name: string;
   description: string | null;
+  sortOrder: number;
   problems: Array<{
     id: string;
     title: string;
@@ -99,6 +102,7 @@ export function mapPrismaSubTopic(st: {
     id: st.id,
     name: st.name,
     description: st.description ?? undefined,
+    sortOrder: st.sortOrder,
     problems: st.problems.map(mapPrismaProblem),
   };
 }
