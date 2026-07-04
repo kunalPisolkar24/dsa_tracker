@@ -46,13 +46,18 @@ export function updateTopicService(
 }
 
 export function createSubTopicService(
-  input: CreateSubTopicInput
+  input: CreateSubTopicInput,
+  existingSubtopics?: Pick<SubTopicStoreItem, "sortOrder">[]
 ): SubTopicStoreItem {
   const parsed = createSubTopicSchema.parse(input);
+  const maxSortOrder = existingSubtopics && existingSubtopics.length > 0
+    ? Math.max(...existingSubtopics.map((s) => s.sortOrder))
+    : -1;
   return {
     id: generateId(),
     name: parsed.name,
     description: parsed.description,
+    sortOrder: maxSortOrder + 1,
     problems: [],
   };
 }
@@ -117,6 +122,20 @@ export function moveProblemInArray(
   const targetIdx = direction === "up" ? idx - 1 : idx + 1;
   if (targetIdx < 0 || targetIdx >= problems.length) return problems;
   const copy = [...problems];
+  [copy[idx], copy[targetIdx]] = [copy[targetIdx], copy[idx]];
+  return copy;
+}
+
+export function moveSubTopicInArray(
+  subtopics: SubTopicStoreItem[],
+  subTopicId: string,
+  direction: "up" | "down"
+): SubTopicStoreItem[] {
+  const idx = subtopics.findIndex((s) => s.id === subTopicId);
+  if (idx === -1) return subtopics;
+  const targetIdx = direction === "up" ? idx - 1 : idx + 1;
+  if (targetIdx < 0 || targetIdx >= subtopics.length) return subtopics;
+  const copy = [...subtopics];
   [copy[idx], copy[targetIdx]] = [copy[targetIdx], copy[idx]];
   return copy;
 }

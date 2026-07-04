@@ -12,6 +12,7 @@ import { SubtopicFormDialog } from "@/components/topics/subtopic-form-dialog";
 import { ProblemFormDialog } from "@/components/topics/problem-form-dialog";
 import { DeleteConfirmationDialog } from "@/components/topics/delete-confirmation-dialog";
 import { UnsavedChangesDialog } from "@/components/topics/unsaved-changes-dialog";
+import { NotesDialog } from "@/components/topics/notes-dialog";
 import { TopicDetailSkeleton } from "@/components/topics/topic-skeleton";
 
 interface TopicsDetailClientProps {
@@ -46,6 +47,8 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
     handleProblemReviewCountChange,
     handleProblemMoveUp,
     handleProblemMoveDown,
+    handleSubTopicMoveUp,
+    handleSubTopicMoveDown,
     handleEnterEditMode,
     handleCancelEdit,
     handleDiscardChanges,
@@ -151,7 +154,7 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
 
       <div className="flex-1 space-y-8">
         {hasSubtopics &&
-          displayTopic!.subtopics.map((subtopic) => {
+          displayTopic!.subtopics.map((subtopic, idx) => {
             const vm = subtopicViewModels.find((v) => v.id === subtopic.id);
             if (!vm) return null;
             return (
@@ -160,6 +163,10 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
                 subtopic={subtopic}
                 viewModel={vm}
                 isEditing={isEditing}
+                isFirst={idx === 0}
+                isLast={idx === displayTopic!.subtopics.length - 1}
+                onMoveUp={handleSubTopicMoveUp}
+                onMoveDown={handleSubTopicMoveDown}
                 onEdit={(st) => setDialog({ type: "editSubTopic", target: st })}
                 onDelete={(st) =>
                   setDialog({
@@ -172,6 +179,9 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
                 onProblemReviewCountChange={handleProblemReviewCountChange}
                 onProblemMoveUp={handleProblemMoveUp}
                 onProblemMoveDown={handleProblemMoveDown}
+                onProblemNotesClick={(p) =>
+                  setDialog({ type: "notes", target: p })
+                }
                 onProblemEdit={(p) =>
                   setDialog({ type: "editProblem", target: p })
                 }
@@ -201,6 +211,9 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
                 onReviewCountChange={handleProblemReviewCountChange}
                 onMoveUp={handleProblemMoveUp}
                 onMoveDown={handleProblemMoveDown}
+                onNotesClick={(p) =>
+                  setDialog({ type: "notes", target: p })
+                }
                 onEdit={(p) =>
                   setDialog({ type: "editProblem", target: p })
                 }
@@ -329,6 +342,16 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
               : handleDeleteProblem
             : () => {}
         }
+      />
+
+      <NotesDialog
+        key={dialog.type === "notes" ? dialog.target.id : "notes"}
+        open={dialog.type === "notes"}
+        onOpenChange={(open) => {
+          if (!open) setDialog({ type: "idle" });
+        }}
+        problemTitle={dialog.type === "notes" ? dialog.target.title : ""}
+        notes={dialog.type === "notes" ? (dialog.target.notes ?? "") : ""}
       />
 
       <UnsavedChangesDialog

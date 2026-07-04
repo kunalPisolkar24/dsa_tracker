@@ -71,3 +71,20 @@ export async function deleteSubTopic(subTopicId: string): Promise<boolean> {
     return false;
   }
 }
+
+export async function reorderSubtopics(
+  topicId: string,
+  subTopicIds: string[]
+): Promise<boolean> {
+  try {
+    await subTopicRepo.reorderSubtopics(topicId, subTopicIds);
+    return true;
+  } catch (error) {
+    logger.error("Failed to reorder subtopics", {
+      topicId,
+      subTopicIds,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return false;
+  }
+}

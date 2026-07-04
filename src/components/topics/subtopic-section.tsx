@@ -8,7 +8,7 @@ import {
   CollapsibleTrigger,
   CollapsibleContent,
 } from "@/components/ui/collapsible";
-import { ChevronDown, Pencil, Trash2 } from "lucide-react";
+import { ChevronDown, Pencil, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SubTopicStoreItem, ProblemStoreItem, SubtopicViewModel } from "@/types/topics";
 import { ProblemRow } from "@/components/topics/problem-row";
@@ -17,12 +17,17 @@ interface SubtopicSectionProps {
   subtopic: SubTopicStoreItem;
   viewModel: SubtopicViewModel;
   isEditing: boolean;
+  isFirst: boolean;
+  isLast: boolean;
+  onMoveUp: (subTopicId: string) => void;
+  onMoveDown: (subTopicId: string) => void;
   onEdit: (subtopic: SubTopicStoreItem) => void;
   onDelete: (subtopic: SubTopicStoreItem) => void;
   onProblemStatusChange: (problemId: string, status: ProblemStoreItem["status"]) => void;
   onProblemReviewCountChange: (problemId: string, count: number) => void;
   onProblemMoveUp: (problemId: string) => void;
   onProblemMoveDown: (problemId: string) => void;
+  onProblemNotesClick: (problem: ProblemStoreItem) => void;
   onProblemEdit: (problem: ProblemStoreItem) => void;
   onProblemDelete: (problem: ProblemStoreItem) => void;
 }
@@ -31,12 +36,17 @@ export function SubtopicSection({
   subtopic,
   viewModel,
   isEditing,
+  isFirst,
+  isLast,
+  onMoveUp,
+  onMoveDown,
   onEdit,
   onDelete,
   onProblemStatusChange,
   onProblemReviewCountChange,
   onProblemMoveUp,
   onProblemMoveDown,
+  onProblemNotesClick,
   onProblemEdit,
   onProblemDelete,
 }: SubtopicSectionProps) {
@@ -74,6 +84,30 @@ export function SubtopicSection({
 
           {isEditing && (
             <div className="flex shrink-0 gap-0.5">
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                disabled={isFirst}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMoveUp(subtopic.id);
+                }}
+                aria-label="Move up"
+              >
+                <ArrowUp className="size-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                disabled={isLast}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMoveDown(subtopic.id);
+                }}
+                aria-label="Move down"
+              >
+                <ArrowDown className="size-3" />
+              </Button>
               <Button
                 variant="ghost"
                 size="icon-xs"
@@ -125,6 +159,7 @@ export function SubtopicSection({
                     onReviewCountChange={onProblemReviewCountChange}
                     onMoveUp={onProblemMoveUp}
                     onMoveDown={onProblemMoveDown}
+                    onNotesClick={onProblemNotesClick}
                     onEdit={onProblemEdit}
                     onDelete={onProblemDelete}
                   />
