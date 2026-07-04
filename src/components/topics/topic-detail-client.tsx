@@ -12,6 +12,7 @@ import { SubtopicFormDialog } from "@/components/topics/subtopic-form-dialog";
 import { ProblemFormDialog } from "@/components/topics/problem-form-dialog";
 import { DeleteConfirmationDialog } from "@/components/topics/delete-confirmation-dialog";
 import { UnsavedChangesDialog } from "@/components/topics/unsaved-changes-dialog";
+import { NotesDialog } from "@/components/topics/notes-dialog";
 import { TopicDetailSkeleton } from "@/components/topics/topic-skeleton";
 
 interface TopicsDetailClientProps {
@@ -178,6 +179,9 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
                 onProblemReviewCountChange={handleProblemReviewCountChange}
                 onProblemMoveUp={handleProblemMoveUp}
                 onProblemMoveDown={handleProblemMoveDown}
+                onProblemNotesClick={(p) =>
+                  setDialog({ type: "notes", target: p })
+                }
                 onProblemEdit={(p) =>
                   setDialog({ type: "editProblem", target: p })
                 }
@@ -207,6 +211,9 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
                 onReviewCountChange={handleProblemReviewCountChange}
                 onMoveUp={handleProblemMoveUp}
                 onMoveDown={handleProblemMoveDown}
+                onNotesClick={(p) =>
+                  setDialog({ type: "notes", target: p })
+                }
                 onEdit={(p) =>
                   setDialog({ type: "editProblem", target: p })
                 }
@@ -335,6 +342,16 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
               : handleDeleteProblem
             : () => {}
         }
+      />
+
+      <NotesDialog
+        key={dialog.type === "notes" ? dialog.target.id : "notes"}
+        open={dialog.type === "notes"}
+        onOpenChange={(open) => {
+          if (!open) setDialog({ type: "idle" });
+        }}
+        problemTitle={dialog.type === "notes" ? dialog.target.title : ""}
+        notes={dialog.type === "notes" ? (dialog.target.notes ?? "") : ""}
       />
 
       <UnsavedChangesDialog

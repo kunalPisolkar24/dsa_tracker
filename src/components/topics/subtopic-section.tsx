@@ -27,6 +27,7 @@ interface SubtopicSectionProps {
   onProblemReviewCountChange: (problemId: string, count: number) => void;
   onProblemMoveUp: (problemId: string) => void;
   onProblemMoveDown: (problemId: string) => void;
+  onProblemNotesClick: (problem: ProblemStoreItem) => void;
   onProblemEdit: (problem: ProblemStoreItem) => void;
   onProblemDelete: (problem: ProblemStoreItem) => void;
 }
@@ -45,6 +46,7 @@ export function SubtopicSection({
   onProblemReviewCountChange,
   onProblemMoveUp,
   onProblemMoveDown,
+  onProblemNotesClick,
   onProblemEdit,
   onProblemDelete,
 }: SubtopicSectionProps) {
@@ -157,6 +159,7 @@ export function SubtopicSection({
                     onReviewCountChange={onProblemReviewCountChange}
                     onMoveUp={onProblemMoveUp}
                     onMoveDown={onProblemMoveDown}
+                    onNotesClick={onProblemNotesClick}
                     onEdit={onProblemEdit}
                     onDelete={onProblemDelete}
                   />

@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUp, ArrowDown, ExternalLink, Pencil, Trash2 } from "lucide-react";
+import { ArrowUp, ArrowDown, ExternalLink, Pencil, Trash2, StickyNote } from "lucide-react";
 import { STATUS_CYCLE, STATUS_STYLES, DIFFICULTY_STYLES } from "@/lib/constants";
 import type { ProblemStoreItem } from "@/types/topics";
 import { cn } from "@/lib/utils";
@@ -22,6 +22,7 @@ interface ProblemRowProps {
   onReviewCountChange: (problemId: string, count: number) => void;
   onMoveUp: (problemId: string) => void;
   onMoveDown: (problemId: string) => void;
+  onNotesClick: (problem: ProblemStoreItem) => void;
   onEdit: (problem: ProblemStoreItem) => void;
   onDelete: (problem: ProblemStoreItem) => void;
 }
@@ -35,6 +36,7 @@ export function ProblemRow({
   onReviewCountChange,
   onMoveUp,
   onMoveDown,
+  onNotesClick,
   onEdit,
   onDelete,
 }: ProblemRowProps) {
@@ -95,6 +97,17 @@ export function ProblemRow({
       <Badge variant="outline" className={cn(difficultyStyle.className)}>
         {difficultyStyle.label}
       </Badge>
+
+      <Button
+        variant="ghost"
+        size="icon-xs"
+        disabled={!problem.notes}
+        onClick={() => onNotesClick(problem)}
+        aria-label="View notes"
+        className={cn(!problem.notes && "opacity-30")}
+      >
+        <StickyNote className="size-3" />
+      </Button>
 
       {isInReview ? (
         <div className="flex w-16 items-center gap-1">
