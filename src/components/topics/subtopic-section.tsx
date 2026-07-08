@@ -83,30 +83,32 @@ export function SubtopicSection({
 
           {isEditing && (
             <div className="flex shrink-0 items-center gap-1">
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                disabled={isFirst}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMoveUp(subtopic.id);
-                }}
-                aria-label="Move up"
-              >
-                <HugeiconsIcon icon={ArrowUp01Icon} className="size-3" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                disabled={isLast}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMoveDown(subtopic.id);
-                }}
-                aria-label="Move down"
-              >
-                <HugeiconsIcon icon={ArrowDown01Icon} className="size-3" />
-              </Button>
+              <div className="flex shrink-0 items-center rounded-xl border border-border bg-card p-0.5 gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  disabled={isFirst}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMoveUp(subtopic.id);
+                  }}
+                  aria-label="Move up"
+                >
+                  <HugeiconsIcon icon={ArrowUp01Icon} className="size-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  disabled={isLast}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMoveDown(subtopic.id);
+                  }}
+                  aria-label="Move down"
+                >
+                  <HugeiconsIcon icon={ArrowDown01Icon} className="size-3" />
+                </Button>
+              </div>
               <div className="flex items-center rounded-xl border border-border bg-card p-0.5 gap-1">
                 <Button
                   variant="ghost"

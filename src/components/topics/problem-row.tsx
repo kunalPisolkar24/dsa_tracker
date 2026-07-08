@@ -48,7 +48,7 @@ export function ProblemRow({
   return (
     <div className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-sm">
       {isEditing && (
-        <div className="flex shrink-0 flex-col gap-0.5">
+        <div className="flex shrink-0 flex-col items-center rounded-xl border border-border bg-card p-0.5 gap-0.5">
           <Button
             variant="ghost"
             size="icon-xs"
