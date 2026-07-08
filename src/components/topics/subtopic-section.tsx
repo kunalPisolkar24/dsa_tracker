@@ -55,7 +55,7 @@ export function SubtopicSection({
   const hasProblems = subtopic.problems.length > 0;
 
   return (
-    <div className="space-y-3">
+    <div className="rounded-lg border border-border/40 bg-card/30 p-4 space-y-3">
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
         <div className="flex items-start justify-between gap-x-2 gap-y-2 flex-wrap">
           <CollapsibleTrigger asChild>
