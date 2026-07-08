@@ -1,7 +1,7 @@
 "use client";
 
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Loading02Icon } from "@hugeicons/core-free-icons";
+import { LoaderPinwheelIcon } from "@hugeicons/core-free-icons";
 import { useActionState } from "react";
 import { signUpAction } from "@/app/(auth)/register/actions";
 import { Button } from "@/components/ui/button";
@@ -72,7 +72,7 @@ export function SignUpForm() {
             <p className="text-sm text-destructive font-medium">{state.error}</p>
           )}
           <Button type="submit" className="w-full" disabled={isPending}>
-            {isPending && <HugeiconsIcon icon={Loading02Icon} className="mr-2 h-4 w-4 animate-spin" />}
+            {isPending && <HugeiconsIcon icon={LoaderPinwheelIcon} className="mr-2 h-4 w-4 animate-spin" />}
             Create account
           </Button>
         </CardContent>

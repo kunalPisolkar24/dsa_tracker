@@ -1,7 +1,7 @@
 "use client";
 
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Loading02Icon } from "@hugeicons/core-free-icons";
+import { LoaderPinwheelIcon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import {
   Dialog,
@@ -120,7 +120,7 @@ export function TopicFormDialog({
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting && <HugeiconsIcon icon={Loading02Icon} className="animate-spin" />}
+            {isSubmitting && <HugeiconsIcon icon={LoaderPinwheelIcon} className="animate-spin" />}
             {isEdit ? "Save Changes" : "Create"}
           </Button>
         </DialogFooter>

@@ -1,7 +1,7 @@
 "use client";
 
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Loading02Icon } from "@hugeicons/core-free-icons";
+import { LoaderPinwheelIcon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import {
   AlertDialog,
@@ -52,7 +52,7 @@ export function DeleteConfirmationDialog({
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
           <AlertDialogAction variant="destructive" onClick={handleConfirm} disabled={isPending}>
-            {isPending && <HugeiconsIcon icon={Loading02Icon} className="mr-1 size-3 animate-spin" />}
+            {isPending && <HugeiconsIcon icon={LoaderPinwheelIcon} className="mr-1 size-3 animate-spin" />}
             {confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>

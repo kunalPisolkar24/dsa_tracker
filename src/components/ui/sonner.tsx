@@ -1,7 +1,7 @@
 "use client"
 
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Alert01Icon, CheckmarkCircle01Icon, InformationCircleIcon, Loading02Icon, OctagonIcon } from "@hugeicons/core-free-icons";
+import { Alert01Icon, CheckmarkCircle01Icon, InformationCircleIcon, LoaderPinwheelIcon, OctagonIcon } from "@hugeicons/core-free-icons";
 import { useTheme } from "next-themes"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 const Toaster = ({ ...props }: ToasterProps) => {
@@ -25,7 +25,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           <HugeiconsIcon icon={OctagonIcon} className="size-4" />
         ),
         loading: (
-          <HugeiconsIcon icon={Loading02Icon} className="size-4 animate-spin" />
+          <HugeiconsIcon icon={LoaderPinwheelIcon} className="size-4 animate-spin" />
         ),
       }}
       style={
