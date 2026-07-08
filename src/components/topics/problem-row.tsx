@@ -1,7 +1,7 @@
 "use client";
 
 import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowDown01Icon, ArrowUp01Icon, Delete02Icon, LinkSquare01Icon, PencilIcon, StickyNote01Icon } from "@hugeicons/core-free-icons";
+import { ArrowDown01Icon, ArrowUp01Icon, Delete02Icon, LinkSquare01Icon, Edit03Icon, StickyNote01Icon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -136,7 +136,7 @@ export function ProblemRow({
             onClick={() => onEdit(problem)}
             aria-label="Edit problem"
           >
-            <HugeiconsIcon icon={PencilIcon} className="size-3" />
+            <HugeiconsIcon icon={Edit03Icon} className="size-3" />
           </Button>
           <Button
             variant="ghost"

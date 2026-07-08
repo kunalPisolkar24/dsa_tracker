@@ -1,7 +1,7 @@
 "use client";
 
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Add01Icon, ArrowLeft01Icon, Loading02Icon, PencilIcon } from "@hugeicons/core-free-icons";
+import { Add01Icon, ArrowLeft01Icon, Loading02Icon, Edit03Icon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -144,7 +144,7 @@ export function TopicsDetailClient({ topicId }: TopicsDetailClientProps) {
               variant="outline"
               onClick={handleEnterEditMode}
             >
-              <HugeiconsIcon icon={PencilIcon} className="size-3" />
+              <HugeiconsIcon icon={Edit03Icon} className="size-3" />
               Edit
             </Button>
           )}

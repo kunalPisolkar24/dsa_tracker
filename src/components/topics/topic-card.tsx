@@ -1,7 +1,7 @@
 "use client";
 
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Delete02Icon, PencilIcon } from "@hugeicons/core-free-icons";
+import { Delete02Icon, Edit03Icon } from "@hugeicons/core-free-icons";
 import {
   Card,
   CardContent,
@@ -33,7 +33,7 @@ export function TopicCard({ topic, onContinue, onEdit, onDelete }: TopicCardProp
               onClick={() => onEdit(topic.id)}
               aria-label={`Edit ${topic.name}`}
             >
-              <HugeiconsIcon icon={PencilIcon} />
+              <HugeiconsIcon icon={Edit03Icon} />
             </Button>
             <Button
               variant="ghost"

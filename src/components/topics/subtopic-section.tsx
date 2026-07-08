@@ -1,7 +1,7 @@
 "use client";
 
 import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowDown01Icon, ArrowUp01Icon, Delete02Icon, PencilIcon } from "@hugeicons/core-free-icons";
+import { ArrowDown01Icon, ArrowUp01Icon, Delete02Icon, Edit03Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -116,7 +116,7 @@ export function SubtopicSection({
                 }}
                 aria-label="Edit sub-topic"
               >
-                <HugeiconsIcon icon={PencilIcon} className="size-3" />
+                <HugeiconsIcon icon={Edit03Icon} className="size-3" />
               </Button>
               <Button
                 variant="ghost"
