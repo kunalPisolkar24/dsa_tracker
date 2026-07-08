@@ -82,7 +82,7 @@ export function SubtopicSection({
           </CollapsibleTrigger>
 
           {isEditing && (
-            <div className="flex shrink-0 gap-0.5">
+            <div className="flex shrink-0 items-center gap-1">
               <Button
                 variant="ghost"
                 size="icon-xs"
@@ -107,28 +107,48 @@ export function SubtopicSection({
               >
                 <HugeiconsIcon icon={ArrowDown01Icon} className="size-3" />
               </Button>
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit(subtopic);
-                }}
-                aria-label="Edit sub-topic"
-              >
-                <HugeiconsIcon icon={Edit03Icon} className="size-3" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(subtopic);
-                }}
-                aria-label="Delete sub-topic"
-              >
-                <HugeiconsIcon icon={Delete02Icon} className="size-3" />
-              </Button>
+              <div className="flex items-center rounded-xl border border-border bg-card p-0.5 gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit(subtopic);
+                  }}
+                  aria-label="Edit sub-topic"
+                  className={cn(
+                    "border border-primary/70 bg-primary/60",
+                    "text-white",
+                    "sm:size-7",
+                    "hover:bg-primary/70 hover:text-white",
+                    "dark:border-primary/50 dark:bg-primary/30",
+                    "dark:hover:bg-primary/40",
+                    "transition-colors",
+                  )}
+                >
+                  <HugeiconsIcon icon={Edit03Icon} className="size-5 sm:size-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(subtopic);
+                  }}
+                  aria-label="Delete sub-topic"
+                  className={cn(
+                    "border border-destructive/70 bg-destructive/60",
+                    "text-white",
+                    "sm:size-7",
+                    "hover:bg-destructive/70 hover:text-white",
+                    "dark:border-destructive/50 dark:bg-destructive/30",
+                    "dark:hover:bg-destructive/40",
+                    "transition-colors",
+                  )}
+                >
+                  <HugeiconsIcon icon={Delete02Icon} className="size-5 sm:size-4" />
+                </Button>
+              </div>
             </div>
           )}
         </div>
