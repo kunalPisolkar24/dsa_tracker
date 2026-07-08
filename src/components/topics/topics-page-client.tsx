@@ -1,12 +1,23 @@
 "use client";
 
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Add01Icon } from "@hugeicons/core-free-icons";
-import { useState, useEffect } from "react";
+import { Add01Icon, Cancel01Icon, Edit03Icon, SaveIcon } from "@hugeicons/core-free-icons";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Pagination,
   PaginationContent,
@@ -48,6 +59,10 @@ export function TopicsPageClient() {
     name: string;
   } | null>(null);
 
+  const [isEditing, setIsEditing] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showBatchDeleteConfirm, setShowBatchDeleteConfirm] = useState(false);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedQuery(searchQuery);
@@ -62,6 +77,77 @@ export function TopicsPageClient() {
     page,
     LAYOUT.PAGE_SIZE
   );
+
+  const allFilteredSelected =
+    filteredTopics.length > 0 && selectedIds.size === filteredTopics.length;
+
+  const visibleSelectedCount = paginatedTopics.filter((t) =>
+    selectedIds.has(t.id)
+  ).length;
+
+  useEffect(() => {
+    setSelectedIds((prev) => {
+      const validIds = new Set(topics.map((t) => t.id));
+      const next = new Set(Array.from(prev).filter((id) => validIds.has(id)));
+      if (next.size === prev.size) return prev;
+      return next;
+    });
+  }, [topics]);
+
+  function handleEnterEditMode() {
+    setIsEditing(true);
+  }
+
+  function handleCancelEdit() {
+    setIsEditing(false);
+    setSelectedIds(new Set());
+  }
+
+  function handleSave() {
+    setIsEditing(false);
+    setSelectedIds(new Set());
+  }
+
+  function handleToggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }
+
+  function handleSelectAll() {
+    const allIds = new Set(filteredTopics.map((t) => t.id));
+    setSelectedIds(allIds);
+  }
+
+  function handleDeselectAll() {
+    setSelectedIds(new Set());
+  }
+
+  function handleToggleSelectAll() {
+    if (allFilteredSelected) {
+      handleDeselectAll();
+    } else {
+      handleSelectAll();
+    }
+  }
+
+  const handleBatchDelete = useCallback(async () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+
+    for (const id of ids) {
+      removeTopic(id);
+    }
+    setSelectedIds(new Set());
+    setShowBatchDeleteConfirm(false);
+    toast.success(`${ids.length} topic(s) deleted successfully`);
+  }, [selectedIds, removeTopic]);
 
   async function handleCreate(input: CreateTopicInput): Promise<boolean> {
     return addTopic(input);
@@ -90,20 +176,84 @@ export function TopicsPageClient() {
 
   return (
     <div className="mx-auto flex w-full flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-4 sm:items-center">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Topics</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Browse and manage your DSA topics here.
           </p>
         </div>
-        <Button onClick={() => setIsCreateOpen(true)}>
-          <HugeiconsIcon icon={Add01Icon} />
-          Create
-        </Button>
+        <div className="flex shrink-0 items-center gap-2">
+          {isEditing ? (
+            <>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleCancelEdit}
+              >
+                Cancel
+              </Button>
+              <Button size="sm" onClick={handleSave}>
+                <HugeiconsIcon icon={SaveIcon} />
+                Save
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                size="sm"
+                onClick={() => setIsCreateOpen(true)}
+              >
+                <HugeiconsIcon icon={Add01Icon} />
+                Create
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleEnterEditMode}
+              >
+                <HugeiconsIcon icon={Edit03Icon} />
+                Edit
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
       <Separator className="my-6" />
+
+      {isEditing && hasFilteredResults && (
+        <div className="mb-4 flex items-center gap-3 rounded-lg border bg-muted/30 px-3 py-2">
+          <Checkbox
+            checked={allFilteredSelected}
+            onCheckedChange={handleToggleSelectAll}
+            aria-label={
+              allFilteredSelected ? "Deselect all topics" : "Select all topics"
+            }
+          />
+          <span className="text-sm text-muted-foreground">
+            {selectedIds.size} of {filteredTopics.length} selected
+            {visibleSelectedCount < selectedIds.size &&
+              selectedIds.size > 0 && (
+                <span className="text-xs">
+                  {" "}
+                  ({visibleSelectedCount} on this page)
+                </span>
+              )}
+          </span>
+          <div className="ml-auto">
+            <Button
+              size="sm"
+              variant="destructive"
+              disabled={selectedIds.size === 0}
+              onClick={() => setShowBatchDeleteConfirm(true)}
+            >
+              <HugeiconsIcon icon={Cancel01Icon} />
+              Delete Selected ({selectedIds.size})
+            </Button>
+          </div>
+        </div>
+      )}
 
       {hasTopics && (
         <div className="mb-6">
@@ -165,6 +315,9 @@ export function TopicsPageClient() {
                 <TopicCard
                   key={topic.id}
                   topic={computeTopicCardViewModel(topic)}
+                  isEditing={isEditing}
+                  isSelected={selectedIds.has(topic.id)}
+                  onToggleSelect={handleToggleSelect}
                   onContinue={handleContinue}
                   onEdit={(id) => {
                     const t = topics.find((x) => x.id === id);
@@ -250,6 +403,31 @@ export function TopicsPageClient() {
         topicName={deleteTarget?.name ?? ""}
         onConfirm={handleDelete}
       />
+
+      <AlertDialog
+        open={showBatchDeleteConfirm}
+        onOpenChange={setShowBatchDeleteConfirm}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Topics</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {selectedIds.size} topic(s)? This
+              will also remove all subtopics and problems within them. This
+              action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={handleBatchDelete}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
