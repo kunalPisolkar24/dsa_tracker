@@ -100,14 +100,20 @@ export function ProblemRow({
       </Badge>
 
       <Button
-        variant="ghost"
-        size="icon-xs"
+        variant="outline"
         disabled={!problem.notes}
         onClick={() => onNotesClick(problem)}
         aria-label="View notes"
-        className={cn(!problem.notes && "opacity-30")}
+        className={cn(
+          "rounded-lg",
+          "bg-muted border-muted-foreground/40",
+          "text-muted-foreground",
+          "size-8 sm:size-7",
+          "hover:bg-muted/80 hover:text-foreground",
+          "transition-colors",
+        )}
       >
-        <HugeiconsIcon icon={StickyNote01Icon} className="size-3" />
+        <HugeiconsIcon icon={StickyNote01Icon} className="size-6 sm:size-5" />
       </Button>
 
       {isInReview ? (
