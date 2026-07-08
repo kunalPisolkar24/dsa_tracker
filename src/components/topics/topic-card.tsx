@@ -34,12 +34,11 @@ export function TopicCard({ topic, onContinue, onEdit, onDelete }: TopicCardProp
               onClick={() => onEdit(topic.id)}
               aria-label={`Edit ${topic.name}`}
               className={cn(
-                "border border-primary/70 bg-primary/60",
-                "text-white",
+                "bg-primary border-primary/80 text-primary-foreground",
                 "sm:size-7",
-                "hover:bg-primary/70 hover:text-white",
-                "dark:border-primary/50 dark:bg-primary/30",
-                "dark:hover:bg-primary/40",
+                "hover:bg-primary/80 hover:text-primary-foreground",
+                "dark:border-primary/50 dark:bg-primary/30 dark:text-white",
+                "dark:hover:bg-primary/40 dark:hover:text-white",
                 "transition-colors",
               )}
             >
@@ -51,10 +50,9 @@ export function TopicCard({ topic, onContinue, onEdit, onDelete }: TopicCardProp
               onClick={() => onDelete(topic.id)}
               aria-label={`Delete ${topic.name}`}
               className={cn(
-                "border border-destructive/70 bg-destructive/60",
-                "text-white",
+                "bg-destructive border-destructive/80 text-white",
                 "sm:size-7",
-                "hover:bg-destructive/70 hover:text-white",
+                "hover:bg-destructive/80 hover:text-white",
                 "dark:border-destructive/50 dark:bg-destructive/30",
                 "dark:hover:bg-destructive/40",
                 "transition-colors",
