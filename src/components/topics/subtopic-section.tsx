@@ -1,5 +1,7 @@
 "use client";
 
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowDown01Icon, ArrowUp01Icon, Delete02Icon, Edit03Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -8,7 +10,6 @@ import {
   CollapsibleTrigger,
   CollapsibleContent,
 } from "@/components/ui/collapsible";
-import { ChevronDown, Pencil, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SubTopicStoreItem, ProblemStoreItem, SubtopicViewModel } from "@/types/topics";
 import { ProblemRow } from "@/components/topics/problem-row";
@@ -54,21 +55,19 @@ export function SubtopicSection({
   const hasProblems = subtopic.problems.length > 0;
 
   return (
-    <div className="space-y-3">
+    <div className="rounded-lg border border-border/40 bg-card/30 p-4 space-y-3">
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-        <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start justify-between gap-x-2 gap-y-2 flex-wrap">
           <CollapsibleTrigger asChild>
             <button
               className="group flex min-w-0 flex-1 cursor-pointer items-start gap-2 text-left"
               aria-expanded={isExpanded}
             >
-              <ChevronDown
-                className={cn(
-                  "mt-0.5 size-4 shrink-0 text-muted-foreground transition-transform",
-                  isExpanded && "rotate-0",
-                  !isExpanded && "-rotate-90"
-                )}
-              />
+              <HugeiconsIcon icon={ArrowDown01Icon} className={cn(
+                                            "mt-0.5 size-4 shrink-0 text-muted-foreground transition-transform",
+                                            isExpanded && "rotate-0",
+                                            !isExpanded && "-rotate-90"
+                                          )} />
               <div className="min-w-0 flex-1">
                 <h3 className="text-base font-medium group-hover:text-foreground/80 transition-colors">
                   {subtopic.name}
@@ -82,66 +81,86 @@ export function SubtopicSection({
             </button>
           </CollapsibleTrigger>
 
-          {isEditing && (
-            <div className="flex shrink-0 gap-0.5">
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                disabled={isFirst}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMoveUp(subtopic.id);
-                }}
-                aria-label="Move up"
-              >
-                <ArrowUp className="size-3" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                disabled={isLast}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMoveDown(subtopic.id);
-                }}
-                aria-label="Move down"
-              >
-                <ArrowDown className="size-3" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit(subtopic);
-                }}
-                aria-label="Edit sub-topic"
-              >
-                <Pencil className="size-3" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(subtopic);
-                }}
-                aria-label="Delete sub-topic"
-              >
-                <Trash2 className="size-3" />
-              </Button>
-            </div>
-          )}
-        </div>
-
-        <div className="space-y-1 pl-6">
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>Progress</span>
-            <span>
-              {viewModel.solvedProblems}/{viewModel.totalProblems}
-            </span>
+          <div className="flex shrink-0 items-center self-center gap-1">
+            {!isEditing && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span className="tabular-nums">
+                  {viewModel.solvedProblems}/{viewModel.totalProblems}
+                </span>
+                <Progress value={viewModel.progressPercent} className="w-28" />
+              </div>
+            )}
+            {isEditing && (
+              <>
+                <div className="flex shrink-0 items-center rounded-xl border border-border bg-card p-0.5 gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon-xs"
+                    disabled={isFirst}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onMoveUp(subtopic.id);
+                    }}
+                    aria-label="Move up"
+                  >
+                    <HugeiconsIcon icon={ArrowUp01Icon} className="size-3" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon-xs"
+                    disabled={isLast}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onMoveDown(subtopic.id);
+                    }}
+                    aria-label="Move down"
+                  >
+                    <HugeiconsIcon icon={ArrowDown01Icon} className="size-3" />
+                  </Button>
+                </div>
+                <div className="flex items-center rounded-xl border border-border bg-card p-0.5 gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit(subtopic);
+                    }}
+                    aria-label="Edit sub-topic"
+                    className={cn(
+                      "bg-primary border-primary/80 text-primary-foreground",
+                      "sm:size-7",
+                      "hover:bg-primary/80 hover:text-primary-foreground",
+                      "dark:border-primary/50 dark:bg-primary/30 dark:text-white",
+                      "dark:hover:bg-primary/40 dark:hover:text-white",
+                      "transition-colors",
+                    )}
+                  >
+                    <HugeiconsIcon icon={Edit03Icon} className="size-5 sm:size-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(subtopic);
+                    }}
+                    aria-label="Delete sub-topic"
+                    className={cn(
+                      "bg-destructive border-destructive/80 text-white",
+                      "sm:size-7",
+                      "hover:bg-destructive/80 hover:text-white",
+                      "dark:border-destructive/50 dark:bg-destructive/30",
+                      "dark:hover:bg-destructive/40",
+                      "transition-colors",
+                    )}
+                  >
+                    <HugeiconsIcon icon={Delete02Icon} className="size-5 sm:size-4" />
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
-          <Progress value={viewModel.progressPercent} />
         </div>
 
         <CollapsibleContent>

@@ -1,9 +1,10 @@
 "use client";
 
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowDown01Icon, ArrowUp01Icon, Delete02Icon, LinkSquare01Icon, Edit03Icon, StickyNote01Icon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUp, ArrowDown, ExternalLink, Pencil, Trash2, StickyNote } from "lucide-react";
 import { STATUS_CYCLE, STATUS_STYLES, DIFFICULTY_STYLES } from "@/lib/constants";
 import type { ProblemStoreItem } from "@/types/topics";
 import { cn } from "@/lib/utils";
@@ -47,7 +48,7 @@ export function ProblemRow({
   return (
     <div className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-sm">
       {isEditing && (
-        <div className="flex shrink-0 flex-col gap-0.5">
+        <div className="flex shrink-0 flex-col items-center rounded-xl border border-border bg-card p-0.5 gap-0.5">
           <Button
             variant="ghost"
             size="icon-xs"
@@ -55,7 +56,7 @@ export function ProblemRow({
             onClick={() => onMoveUp(problem.id)}
             aria-label="Move up"
           >
-            <ArrowUp className="size-3" />
+            <HugeiconsIcon icon={ArrowUp01Icon} className="size-3" />
           </Button>
           <Button
             variant="ghost"
@@ -64,7 +65,7 @@ export function ProblemRow({
             onClick={() => onMoveDown(problem.id)}
             aria-label="Move down"
           >
-            <ArrowDown className="size-3" />
+            <HugeiconsIcon icon={ArrowDown01Icon} className="size-3" />
           </Button>
         </div>
       )}
@@ -78,7 +79,7 @@ export function ProblemRow({
             className="whitespace-nowrap font-medium underline-offset-2 hover:underline"
           >
             {problem.title}
-            <ExternalLink className="ml-1 inline size-3 text-muted-foreground" />
+            <HugeiconsIcon icon={LinkSquare01Icon} className="ml-1 inline size-3 text-muted-foreground" />
           </a>
         ) : (
           <span className="whitespace-nowrap font-medium">{problem.title}</span>
@@ -99,14 +100,20 @@ export function ProblemRow({
       </Badge>
 
       <Button
-        variant="ghost"
-        size="icon-xs"
+        variant="outline"
         disabled={!problem.notes}
         onClick={() => onNotesClick(problem)}
         aria-label="View notes"
-        className={cn(!problem.notes && "opacity-30")}
+        className={cn(
+          "rounded-lg",
+          "bg-muted border-muted-foreground/40",
+          "text-muted-foreground",
+          "size-8 sm:size-7",
+          "hover:bg-muted/80 hover:text-foreground",
+          "transition-colors",
+        )}
       >
-        <StickyNote className="size-3" />
+        <HugeiconsIcon icon={StickyNote01Icon} className="size-6 sm:size-5" />
       </Button>
 
       {isInReview ? (
@@ -128,22 +135,38 @@ export function ProblemRow({
       )}
 
       {isEditing && (
-        <div className="flex shrink-0 gap-0.5">
+        <div className="flex shrink-0 items-center rounded-xl border border-border bg-card p-0.5 gap-1">
           <Button
             variant="ghost"
-            size="icon-xs"
+            size="icon"
             onClick={() => onEdit(problem)}
             aria-label="Edit problem"
+            className={cn(
+              "bg-primary border-primary/80 text-primary-foreground",
+              "sm:size-7",
+              "hover:bg-primary/80 hover:text-primary-foreground",
+              "dark:border-primary/50 dark:bg-primary/30 dark:text-white",
+              "dark:hover:bg-primary/40 dark:hover:text-white",
+              "transition-colors",
+            )}
           >
-            <Pencil className="size-3" />
+            <HugeiconsIcon icon={Edit03Icon} className="size-5 sm:size-4" />
           </Button>
           <Button
             variant="ghost"
-            size="icon-xs"
+            size="icon"
             onClick={() => onDelete(problem)}
             aria-label="Delete problem"
+            className={cn(
+              "bg-destructive border-destructive/80 text-white",
+              "sm:size-7",
+              "hover:bg-destructive/80 hover:text-white",
+              "dark:border-destructive/50 dark:bg-destructive/30",
+              "dark:hover:bg-destructive/40",
+              "transition-colors",
+            )}
           >
-            <Trash2 className="size-3" />
+            <HugeiconsIcon icon={Delete02Icon} className="size-5 sm:size-4" />
           </Button>
         </div>
       )}

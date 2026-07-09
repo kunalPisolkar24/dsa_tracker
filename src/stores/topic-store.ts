@@ -46,6 +46,9 @@ interface TopicStoreActions {
   updateProblemReviewCount: (topicId: string, problemId: string, reviewCount: number) => void;
   moveProblem: (topicId: string, problemId: string, direction: "up" | "down") => Promise<void>;
   replaceTopic: (topicId: string, updated: TopicStoreItem) => void;
+  localUpdateTopic: (id: string, input: UpdateTopicInput) => void;
+  localRemoveTopic: (id: string) => void;
+  replaceTopics: (topics: TopicStoreItem[]) => void;
 }
 
 type TopicStore = TopicStoreState & TopicStoreActions;
@@ -504,5 +507,23 @@ export const useTopicStore = create<TopicStore>((set, get) => ({
     set((state) => ({
       topics: state.topics.map((t) => (t.id === topicId ? updated : t)),
     }));
+  },
+
+  localUpdateTopic: (id, input) => {
+    set((state) => ({
+      topics: state.topics.map((t) =>
+        t.id === id ? updateTopicService(t, input) : t
+      ),
+    }));
+  },
+
+  localRemoveTopic: (id) => {
+    set((state) => ({
+      topics: state.topics.filter((t) => t.id !== id),
+    }));
+  },
+
+  replaceTopics: (topics) => {
+    set({ topics });
   },
 }));
