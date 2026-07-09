@@ -33,15 +33,17 @@ import {
 import { computeTopicCardViewModel } from "@/lib/topic-view-models";
 import { LAYOUT } from "@/lib/constants";
 import type { CreateTopicInput } from "@/lib/schemas";
+import type { TopicStoreItem } from "@/types/topics";
 import { TopicCard } from "@/components/topics/topic-card";
 import { TopicSearch } from "@/components/topics/topic-search";
 import { TopicFormDialog } from "@/components/topics/topic-form-dialog";
 import { DeleteTopicDialog } from "@/components/topics/delete-topic-dialog";
+import { UnsavedChangesDialog } from "@/components/topics/unsaved-changes-dialog";
 import { TopicCardSkeleton } from "@/components/topics/topic-skeleton";
 
 export function TopicsPageClient() {
   const router = useRouter();
-  const { topics, addTopic, updateTopic, removeTopic } = useTopicStore();
+  const { topics, addTopic, updateTopic, removeTopic, localUpdateTopic, localRemoveTopic, replaceTopics } = useTopicStore();
   const hydrated = useTopicStore((s) => s.hydrated);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -62,6 +64,10 @@ export function TopicsPageClient() {
   const [isEditing, setIsEditing] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showBatchDeleteConfirm, setShowBatchDeleteConfirm] = useState(false);
+  const [pendingEdits, setPendingEdits] = useState<Map<string, CreateTopicInput>>(new Map());
+  const [pendingDeletes, setPendingDeletes] = useState<Set<string>>(new Set());
+  const [savedSnapshot, setSavedSnapshot] = useState<TopicStoreItem[]>([]);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -95,17 +101,46 @@ export function TopicsPageClient() {
   }, [topics]);
 
   function handleEnterEditMode() {
+    setSavedSnapshot(structuredClone(topics));
+    setPendingEdits(new Map());
+    setPendingDeletes(new Set());
     setIsEditing(true);
   }
 
-  function handleCancelEdit() {
+  function exitEditMode() {
     setIsEditing(false);
     setSelectedIds(new Set());
+    setPendingEdits(new Map());
+    setPendingDeletes(new Set());
+    setSavedSnapshot([]);
+  }
+
+  function handleCancelEdit() {
+    if (pendingEdits.size > 0 || pendingDeletes.size > 0) {
+      setShowUnsavedDialog(true);
+    } else {
+      exitEditMode();
+    }
+  }
+
+  function handleDiscardChanges() {
+    setShowUnsavedDialog(false);
+    replaceTopics(savedSnapshot);
+    exitEditMode();
   }
 
   function handleSave() {
-    setIsEditing(false);
-    setSelectedIds(new Set());
+    for (const [id, input] of pendingEdits) {
+      updateTopic(id, input);
+    }
+    for (const id of pendingDeletes) {
+      removeTopic(id);
+    }
+    exitEditMode();
+    const totalChanges = pendingEdits.size + pendingDeletes.size;
+    if (totalChanges > 0) {
+      toast.success(`${totalChanges} change(s) saved successfully`);
+    }
   }
 
   function handleToggleSelect(id: string) {
@@ -142,12 +177,17 @@ export function TopicsPageClient() {
     if (ids.length === 0) return;
 
     for (const id of ids) {
-      removeTopic(id);
+      if (isEditing) {
+        localRemoveTopic(id);
+        setPendingDeletes((prev) => new Set(prev).add(id));
+      } else {
+        removeTopic(id);
+      }
     }
     setSelectedIds(new Set());
     setShowBatchDeleteConfirm(false);
     toast.success(`${ids.length} topic(s) deleted successfully`);
-  }, [selectedIds, removeTopic]);
+  }, [selectedIds, isEditing, localRemoveTopic, removeTopic]);
 
   async function handleCreate(input: CreateTopicInput): Promise<boolean> {
     return addTopic(input);
@@ -155,14 +195,24 @@ export function TopicsPageClient() {
 
   async function handleEdit(input: CreateTopicInput): Promise<boolean> {
     if (!editTarget) return false;
-    updateTopic(editTarget.id, input);
+    if (isEditing) {
+      localUpdateTopic(editTarget.id, input);
+      setPendingEdits((prev) => new Map(prev).set(editTarget.id, input));
+    } else {
+      updateTopic(editTarget.id, input);
+    }
     toast.success("Topic updated successfully");
     return true;
   }
 
   function handleDelete() {
     if (!deleteTarget) return;
-    removeTopic(deleteTarget.id);
+    if (isEditing) {
+      localRemoveTopic(deleteTarget.id);
+      setPendingDeletes((prev) => new Set(prev).add(deleteTarget.id));
+    } else {
+      removeTopic(deleteTarget.id);
+    }
     setDeleteTarget(null);
     toast.success("Topic deleted successfully");
   }
@@ -402,6 +452,12 @@ export function TopicsPageClient() {
         }}
         topicName={deleteTarget?.name ?? ""}
         onConfirm={handleDelete}
+      />
+
+      <UnsavedChangesDialog
+        open={showUnsavedDialog}
+        onOpenChange={setShowUnsavedDialog}
+        onDiscard={handleDiscardChanges}
       />
 
       <AlertDialog
