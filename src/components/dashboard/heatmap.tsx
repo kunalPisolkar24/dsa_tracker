@@ -16,6 +16,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { FireIcon, ChampionIcon } from "@hugeicons/core-free-icons";
 import { toDateStr } from "@/lib/date-utils";
 import type { HeatmapEntry } from "@/lib/dashboard-data";
 
@@ -33,7 +35,7 @@ const LEVELS = [
   { threshold: 4, className: "bg-chart-2" },
 ] as const;
 
-const CELL_SIZE = "clamp(14px, 2vw, 18px)";
+const CELL_SIZE = "clamp(14px, 2.5vw, 22px)";
 
 function getLevel(count: number) {
   for (let i = LEVELS.length - 1; i >= 0; i--) {
@@ -180,14 +182,14 @@ export function Heatmap({ data, streak, maxStreak }: HeatmapProps) {
         </div>
         <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1 rounded-md border border-border bg-muted/50 px-2 py-0.5 text-foreground">
-              <span className="leading-none">🔥</span>
-              <span className="font-medium">{streak}</span>
+            <div className="flex items-center gap-1.5 rounded-sm bg-orange-500/10 border-2 border-orange-500/30 px-2.5 py-1">
+              <HugeiconsIcon icon={FireIcon} className="size-4 text-orange-500" />
+              <span className="font-semibold text-orange-500">{streak}</span>
               <span className="text-muted-foreground">day streak</span>
             </div>
-            <div className="flex items-center gap-1 rounded-md border border-border bg-muted/50 px-2 py-0.5 text-foreground">
-              <span className="leading-none">🏆</span>
-              <span className="font-medium">{maxStreak}</span>
+            <div className="flex items-center gap-1.5 rounded-sm bg-yellow-500/10 border-2 border-yellow-500/30 px-2.5 py-1">
+              <HugeiconsIcon icon={ChampionIcon} className="size-4 text-yellow-500" />
+              <span className="font-semibold text-yellow-500">{maxStreak}</span>
               <span className="text-muted-foreground">max</span>
             </div>
           </div>
