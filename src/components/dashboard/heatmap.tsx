@@ -35,7 +35,7 @@ const LEVELS = [
   { threshold: 4, className: "bg-chart-2" },
 ] as const;
 
-const CELL_SIZE = "clamp(14px, 2vw, 18px)";
+const CELL_SIZE = "clamp(14px, 2.5vw, 22px)";
 
 function getLevel(count: number) {
   for (let i = LEVELS.length - 1; i >= 0; i--) {
